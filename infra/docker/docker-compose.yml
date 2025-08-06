@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bookloop
+    ports:
+      - "5432:5432"
+  server:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.server
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/bookloop
+    ports:
+      - "3000:3000"
