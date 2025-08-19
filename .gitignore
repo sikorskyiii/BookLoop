@@ -1,0 +1,8 @@
+node_modules
+.expo
+.expo-shared
+.expo/web/cache
+.DS_Store
+**/ios/Pods
+.env
+apps/api/dist
