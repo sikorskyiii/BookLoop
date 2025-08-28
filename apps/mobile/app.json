@@ -1,29 +1,14 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
-    "version": "1.0.0",
+    "name": "BookLoop",
+    "slug": "bookloop",
+    "scheme": "bookloop",
+    "runtimeVersion": { "policy": "sdkVersion" },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#0f1115" },
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.sikorskyiii.bookloop" },
+    "android": { "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#0f1115" }, "package": "com.sikorskyiii.bookloop" },
+    "web": { "bundler": "metro", "output": "static" }
   }
 }
