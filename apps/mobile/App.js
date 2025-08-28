@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 
+import Boot from "./src/screens/Boot";
 import Entry from "./src/screens/Entry";
 import Login from "./src/screens/Login";
 import Register from "./src/screens/Register";
@@ -54,8 +55,9 @@ function MainTabs() {
 
 export default function App() {
   return (
-    <NavigationContainer theme={navTheme}>
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <NavigationContainer theme={navTheme}>
+      <RootStack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Boot">
+        <RootStack.Screen name="Boot" component={Boot} />
         <RootStack.Screen name="Entry" component={Entry} />
         <RootStack.Screen name="Login" component={Login} />
         <RootStack.Screen name="Register" component={Register} />
