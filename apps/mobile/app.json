@@ -3,12 +3,33 @@
     "name": "BookLoop",
     "slug": "bookloop",
     "scheme": "bookloop",
-    "runtimeVersion": { "policy": "sdkVersion" },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#0f1115" },
-    "ios": { "supportsTablet": true, "bundleIdentifier": "com.sikorskyiii.bookloop" },
-    "android": { "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#0f1115" }, "package": "com.sikorskyiii.bookloop" },
-    "web": { "bundler": "metro", "output": "static" }
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f1115"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sikorskyiii.bookloop"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0f1115"
+      },
+      "package": "com.sikorskyiii.bookloop"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }
