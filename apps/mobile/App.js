@@ -15,12 +15,12 @@ import Profile from "./src/screens/Profile";
 import { theme } from "./src/theme/theme";
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();       // для Library stack
-const RootStack = createNativeStackNavigator();   // для Entry/Login/Register/Main
+const Stack = createNativeStackNavigator();     
+const RootStack = createNativeStackNavigator();   
 
 const navTheme = {
   ...DefaultTheme,
-  colors: { ...DefaultTheme.colors, background: theme.colors.bg, card: theme.colors.bg, text: theme.colors.text, border: theme.colors.border }
+  colors: { ...DefaultTheme.colors, background: theme.colors.nav, card: theme.colors.bg, text: theme.colors.text, border: theme.colors.border }
 };
 
 function LibraryStack() {
@@ -37,9 +37,9 @@ function MainTabs() {
   return (
     <Tab.Navigator screenOptions={({ route }) => ({
       headerShown: false,
-      tabBarStyle: { backgroundColor: theme.colors.card, borderTopColor: theme.colors.border },
-      tabBarActiveTintColor: theme.colors.primary,
-      tabBarInactiveTintColor: theme.colors.textMuted,
+      tabBarStyle: { backgroundColor: theme.colors.nav, borderTopColor: theme.colors.border },
+      tabBarActiveTintColor: theme.colors.active,
+      tabBarInactiveTintColor: theme.colors.inactive,
       tabBarIcon: ({ color, size }) => {
         const map = { Home: "home-outline", Search: "search-outline", Profile: "person-outline" };
         return <Ionicons name={map[route.name]} size={size} color={color} />;

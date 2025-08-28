@@ -1,23 +1,36 @@
 export const theme = {
   colors: {
-    bg: "#0f1115",
-    card: "#171a20",
-    text: "#e6e8ee",
-    textMuted: "#9aa3b2",
-    primary: "#7c5cff",
-    primaryMuted: "#b2a4ff",
-    border: "#232734",
-    danger: "#ff6b6b"
+    active:"#fff",
+    inactive:"#C7C1C3",
+    bg: "#F6F2EA",          // фон екрана
+    card: "#F7F1E8",        // світла "картка"/поверхня
+    text: "#2E2728",        // основний текст (темний)
+    textMuted: "#8F857C",   // приглушений текст
+    primary: "#B4876B",     // акцент (кнопки "Вхід"/"Зареєструватись")
+    primaryMuted: "#D7C2B6",
+    border: "#E6DED5",
+    danger: "#E15C5C",
+    nav:"#95897D",
+    ink: "#2E2728",             // темний текст/іконки
+    paper: "#F6F2EA",           // світлий фон
+    accentWarm: "#9A6B52",      // теплий бордер/акцент
+    fieldBg: "#2E2728",         // фон інпутів (темні поля)
+    fieldText: "#EEE9E3",
+    fieldPlaceholder: "#B8B0AA",
+    googleBtn: "#2E2728",
+
+    // Тони для фон-плям на Entry
+    entryA: "#F9E4BE",
+    entryB: "#F2B6A0"
   },
-  radius: { sm: 8, md: 12, lg: 16, xl: 24 },
+
+  radius: { xs: 6, sm: 8, md: 12, lg: 16, xl: 24, pill: 28, full: 999 },
   spacing: (n) => 4 * n,
+
   shadow: {
-    card: {
-      shadowColor: "#000",
-      shadowOpacity: 0.25,
-      shadowOffset: { width: 0, height: 8 },
-      shadowRadius: 12,
-      elevation: 6
-    }
-  }
+    card: { shadowColor: "#000", shadowOpacity: 0.12, shadowOffset: { width: 0, height: 8 }, shadowRadius: 12, elevation: 6 },
+    soft: { shadowColor: "#000", shadowOpacity: 0.08, shadowOffset: { width: 0, height: 3 }, shadowRadius: 6, elevation: 3 }
+  },
+
+  z: { header: 10, fab: 20, modal: 30 }
 };

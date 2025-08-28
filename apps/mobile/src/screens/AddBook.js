@@ -38,9 +38,6 @@ export default function AddBook({ navigation }) {
         <Input placeholder="Опис (необов’язково)" value={description} onChangeText={setDescription} multiline />
         <Input placeholder="Категорія (Fiction/Sci-Fi/...)" value={category} onChangeText={setCategory} />
         <Button title="Зберегти" onPress={onSave} />
-        <Text style={{ color: theme.colors.textMuted, fontSize:12, marginTop:8 }}>
-          Порада: на реальному девайсі заміни baseURL на IP компʼютера у src/api/client.js
-        </Text>
       </View>
     </View>
   );
