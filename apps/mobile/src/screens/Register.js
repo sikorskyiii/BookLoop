@@ -51,8 +51,6 @@ export default function Register({ navigation }) {
         <View style={{ height: 12 }} />
         <AuthInput placeholder="Електронна пошта" value={email} onChangeText={setEmail} keyboardType="email-address" />
         <View style={{ height: 12 }} />
-        <AuthInput placeholder="Номер телефону" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-        <View style={{ height: 12 }} />
         <AuthInput placeholder="Пароль" value={pass} onChangeText={setPass} secure />
 
         {!!error && (
