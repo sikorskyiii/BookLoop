@@ -15,7 +15,11 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/auth", authRoutes);
 app.use("/books", bookRoutes);
 
-// 404
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ message: "Server error" });
+});
+
 app.use((_req, res) => res.status(404).json({ message: "Not found" }));
 
 const port = process.env.PORT || 3000;
