@@ -28,10 +28,10 @@ export const useAuth = create((set, get) => ({
     }
   },
 
-  register: async ({ firstName, lastName, email, phone, password }) => {
+  register: async ({ firstName, lastName, email, password }) => {
     set({ loading: true, error: null });
     try {
-      const { token, user } = await registerApi({ firstName, lastName, email, phone, password });
+      const { token, user } = await registerApi({ firstName, lastName, email, password });
       setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
       set({ token, user, loading: false });
