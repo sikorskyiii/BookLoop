@@ -18,7 +18,6 @@ export default function Register({ navigation }) {
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [pass, setPass] = useState("");
 
   const { register, loading, error } = useAuth();

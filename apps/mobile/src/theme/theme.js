@@ -2,24 +2,23 @@ export const theme = {
   colors: {
     active:"#fff",
     inactive:"#C7C1C3",
-    bg: "#F6F2EA",          // фон екрана
-    card: "#F7F1E8",        // світла "картка"/поверхня
-    text: "#2E2728",        // основний текст (темний)
-    textMuted: "#8F857C",   // приглушений текст
-    primary: "#B4876B",     // акцент (кнопки "Вхід"/"Зареєструватись")
+    bg: "#F6F2EA",         
+    card: "#F7F1E8",     
+    text: "#2E2728",        
+    textMuted: "#8F857C",   
+    primary: "#B4876B",     
     primaryMuted: "#D7C2B6",
     border: "#E6DED5",
     danger: "#E15C5C",
     nav:"#95897D",
-    ink: "#2E2728",             // темний текст/іконки
-    paper: "#F6F2EA",           // світлий фон
-    accentWarm: "#9A6B52",      // теплий бордер/акцент
-    fieldBg: "#2E2728",         // фон інпутів (темні поля)
+    ink: "#2E2728",             
+    paper: "#F6F2EA",           
+    accentWarm: "#9A6B52",      
+    fieldBg: "#2E2728",        
     fieldText: "#EEE9E3",
     fieldPlaceholder: "#B8B0AA",
     googleBtn: "#2E2728",
 
-    // Тони для фон-плям на Entry
     entryA: "#F9E4BE",
     entryB: "#F2B6A0"
   },

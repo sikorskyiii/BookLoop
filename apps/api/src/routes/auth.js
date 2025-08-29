@@ -16,7 +16,6 @@ const pub = (u) => ({
   firstName: u.first_name,
   lastName: u.last_name,
   email: u.email,
-  phone: u.phone,
   createdAt: u.created_at
 });
 
@@ -30,16 +29,16 @@ router.post(
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ message: "Invalid payload", errors: errors.array() });
 
-    const { firstName, lastName, email, phone, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
     const exists = await query("SELECT 1 FROM users WHERE email = $1", [email]);
     if (exists.rowCount) return res.status(409).json({ message: "Email already in use" });
 
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await query(
-      `INSERT INTO users (first_name, last_name, email, phone, password_hash)
-       VALUES ($1,$2,$3,$4,$5)
+      `INSERT INTO users (first_name, last_name, email, password_hash)
+       VALUES ($1,$2,$3,$4)
        RETURNING *`,
-      [firstName, lastName, email, phone || null, hash]
+      [firstName, lastName, email, hash]
     );
 
     const user = rows[0];

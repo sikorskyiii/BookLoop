@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
   first_name TEXT NOT NULL,
   last_name  TEXT NOT NULL,
   email      CITEXT UNIQUE NOT NULL,
-  phone      TEXT,
   password_hash TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
