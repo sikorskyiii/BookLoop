@@ -27,7 +27,6 @@ export default function Register({ navigation }) {
       firstName: first,
       lastName: last,
       email,
-      phone,
       password: pass
     });
     if (res.ok) navigation.replace("Main");

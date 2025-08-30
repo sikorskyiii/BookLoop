@@ -20,19 +20,6 @@ export default function Entry({ navigation }) {
         width: width * 0.9, height: height * 0.6, backgroundColor: "#F2B6A0",
         borderRadius: width, transform: [{ rotate: "-8deg" }], opacity: 0.6
       }} />
-      <Pressable
-        onPress={goMain}
-        style={{
-          position: "absolute", top: 50, right: 16,
-          paddingHorizontal: 18, paddingVertical: 10,
-          backgroundColor: "#fff", borderRadius: 22,
-          shadowColor: "#000", shadowOpacity: 0.1, 
-          shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, 
-          elevation: 3, marginTop: 35,
-        }}
-        >
-        <Text style={{ color: "#2b2b2b", fontWeight: "600" }}>пропуск</Text>
-      </Pressable>
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <View style={{
           width: width * 0.58, height: width * 0.58, borderRadius: width * 0.29,
