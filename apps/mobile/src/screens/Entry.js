@@ -3,7 +3,6 @@ import { View, Text, Pressable, Dimensions, StatusBar, Image } from "react-nativ
 const { width, height } = Dimensions.get("window");
 
 export default function Entry({ navigation }) {
-  const goMain = () => navigation.replace("Main");
   const goLogin = () => navigation.navigate("Login");
   const goRegister = () => navigation.navigate("Register");
 
