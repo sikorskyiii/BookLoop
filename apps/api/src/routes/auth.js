@@ -2,9 +2,13 @@ import { Router } from "express";
 import { body, validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { query } from "../db.js";
+import { query as db } from "../db.js";
+import { requireAuth } from "../middlewares/auth.js";
 
 const router = Router();
+
+const normalizeEmail = (v) => (v ?? "").toString().trim().toLowerCase();
+const trimStr = (v) => (v ?? "").toString().trim();
 
 function sign(userId) {
   const expiresIn = process.env.JWT_EXPIRES_IN || "7d";
@@ -19,22 +23,36 @@ const pub = (u) => ({
   createdAt: u.created_at
 });
 
+function formatErrors(result) {
+  const out = {};
+  for (const e of result.array()) {
+    if (!out[e.path]) out[e.path] = e.msg;
+  }
+  return out;
+}
+
+/** REGISTER */
 router.post(
   "/register",
-  body("firstName").isLength({ min: 1 }),
-  body("lastName").isLength({ min: 1 }),
-  body("email").isEmail(),
-  body("password").isLength({ min: 6 }),
+  body("firstName").customSanitizer(trimStr).isLength({ min: 1 }).withMessage("Вкажіть імʼя"),
+  body("lastName").customSanitizer(trimStr).isLength({ min: 1 }).withMessage("Вкажіть прізвище"),
+  body("email").customSanitizer(normalizeEmail).isEmail().withMessage("Невалідний email"),
+  body("password").isLength({ min: 6 }).withMessage("Мінімум 6 символів у паролі"),
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ message: "Invalid payload", errors: errors.array() });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: "Некоректні дані", errors: formatErrors(errors) });
+    }
 
     const { firstName, lastName, email, password } = req.body;
-    const exists = await query("SELECT 1 FROM users WHERE email = $1", [email]);
-    if (exists.rowCount) return res.status(409).json({ message: "Email already in use" });
+
+    const exists = await db("SELECT 1 FROM users WHERE email = $1", [email]);
+    if (exists.rowCount) {
+      return res.status(409).json({ message: "Email вже використовується", errors: { email: "Email вже використовується" } });
+    }
 
     const hash = await bcrypt.hash(password, 10);
-    const { rows } = await query(
+    const { rows } = await db(
       `INSERT INTO users (first_name, last_name, email, password_hash)
        VALUES ($1,$2,$3,$4)
        RETURNING *`,
@@ -43,44 +61,40 @@ router.post(
 
     const user = rows[0];
     const token = sign(user.id);
-    res.status(201).json({ token, user: pub(user) });
+    return res.status(201).json({ token, user: pub(user) });
   }
 );
 
+/** LOGIN */
 router.post(
   "/login",
-  body("email").isEmail(),
-  body("password").isLength({ min: 6 }),
+  body("email").customSanitizer(normalizeEmail).isEmail().withMessage("Невалідний email"),
+  body("password").isLength({ min: 6 }).withMessage("Невірний пароль"),
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ message: "Invalid payload", errors: errors.array() });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: "Некоректні дані", errors: formatErrors(errors) });
+    }
 
     const { email, password } = req.body;
-    const { rows } = await query("SELECT * FROM users WHERE email = $1", [email]);
+    const { rows } = await db("SELECT * FROM users WHERE email = $1", [email]);
     const user = rows[0];
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    if (!user) return res.status(401).json({ message: "Невірні облікові дані" });
 
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) return res.status(401).json({ message: "Invalid credentials" });
+    if (!ok) return res.status(401).json({ message: "Невірні облікові дані" });
 
     const token = sign(user.id);
-    res.json({ token, user: pub(user) });
+    return res.json({ token, user: pub(user) });
   }
 );
 
-router.get("/me", async (req, res) => {
-  const h = req.headers.authorization || "";
-  const token = h.startsWith("Bearer ") ? h.slice(7) : null;
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const { rows } = await query("SELECT * FROM users WHERE id = $1", [payload.sub]);
-    const user = rows[0];
-    if (!user) return res.status(401).json({ message: "Unauthorized" });
-    res.json({ user: pub(user) });
-  } catch {
-    return res.status(401).json({ message: "Invalid token" });
-  }
+/** ME */
+router.get("/me", requireAuth, async (req, res) => {
+  const { rows } = await db("SELECT * FROM users WHERE id = $1", [req.userId]);
+  const user = rows[0];
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+  return res.json({ user: pub(user) });
 });
 
 export default router;
