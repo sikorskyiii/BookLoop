@@ -26,7 +26,7 @@ export default function Register({ navigation }) {
     const res = await register({
       firstName: first,
       lastName: last,
-      email,
+      email:email,
       password: pass
     });
     if (res.ok) navigation.replace("Main");
