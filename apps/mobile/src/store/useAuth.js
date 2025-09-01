@@ -9,7 +9,8 @@ export const useAuth = create((set, get) => ({
   token: null,
   user: null,
   loading: false,
-  error: null,
+  error: null, 
+
   init: async () => {
     try {
       set({ loading: true, error: null });
@@ -17,11 +18,10 @@ export const useAuth = create((set, get) => ({
       if (t) {
         setAuthToken(t);
         set({ token: t });
-
         try {
           const { user } = await meApi();
           set({ user });
-        } catch { }
+        } catch {}
       }
     } finally {
       set({ loading: false });
@@ -34,12 +34,13 @@ export const useAuth = create((set, get) => ({
       const { token, user } = await registerApi({ firstName, lastName, email, password });
       setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
-      set({ token, user, loading: false });
+      set({ token, user, loading: false, error: null });
       return { ok: true };
     } catch (e) {
-      const msg = e?.response?.data?.message || "Помилка реєстрації";
-      set({ error: msg, loading: false });
-      return { ok: false, error: msg };
+      const apiErr = e?.response?.data || {};
+      const err = typeof apiErr === "object" ? apiErr : { message: "Помилка реєстрації" };
+      set({ error: err, loading: false });
+      return { ok: false, error: err };
     }
   },
 
@@ -49,12 +50,13 @@ export const useAuth = create((set, get) => ({
       const { token, user } = await loginApi({ email, password });
       setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
-      set({ token, user, loading: false });
+      set({ token, user, loading: false, error: null });
       return { ok: true };
     } catch (e) {
-      const msg = e?.response?.data?.message || "Невірні дані входу";
-      set({ error: msg, loading: false });
-      return { ok: false, error: msg };
+      const apiErr = e?.response?.data || {};
+      const err = typeof apiErr === "object" ? apiErr : { message: "Невірні дані входу" };
+      set({ error: err, loading: false });
+      return { ok: false, error: err };
     }
   },
 
