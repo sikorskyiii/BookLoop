@@ -43,7 +43,7 @@ export default function Profile({ navigation }){
           <Row label="Імʼя" value={user.firstName} />
           <Row label="Прізвище" value={user.lastName} />
           <Row label="Email" value={user.email} />
-          <Row label="Телефон" value={user.phone} />
+          
         </View>
         <Pressable
           onPress={logout}
