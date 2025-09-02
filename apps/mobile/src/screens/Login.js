@@ -27,12 +27,16 @@ export default function Login({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: P.bg }}>
-      <Pressable onPress={() => navigation.goBack()} style={{ paddingTop: 14, paddingHorizontal: 14 }}>
-        <Ionicons name="chevron-back" size={26} color="#6F645B" />
-      </Pressable>
+    <Pressable
+      onPress={() =>
+      navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Entry")
+    }
+      style={{ paddingTop: 74, paddingHorizontal: 14 }} >
+     <Ionicons name="chevron-back" size={26} color="#6F645B" />
+   </Pressable>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 6 }}>
-        <Text style={{ textAlign: "center", fontSize: 24, fontWeight: "800", color: P.title, marginBottom: 18 }}>
+        <Text style={{ textAlign: "center", fontSize: 24, fontWeight: "800", color: P.title,marginTop: 175 , marginBottom: 18 }}>
           Вхід в акаунт
         </Text>
 
