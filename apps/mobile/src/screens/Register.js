@@ -34,7 +34,10 @@ export default function Register({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: P.bg }}>
-      <Pressable onPress={() => navigation.goBack()} style={{ paddingTop: 64, paddingHorizontal: 14 }}>
+      <Pressable
+        onPress={() =>  navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Entry")}
+        style={{ paddingTop: 64, paddingHorizontal: 14 }}
+      >      
         <Ionicons name="chevron-back" size={26} color="#6F645B" />
       </Pressable>
 
