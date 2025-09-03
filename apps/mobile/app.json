@@ -2,6 +2,7 @@
   "expo": {
     "name": "BookLoop",
     "slug": "bookloop",
+    "owner": "sikorskyii", 
     "scheme": "bookloop",
     "runtimeVersion": {
       "policy": "sdkVersion"
