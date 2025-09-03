@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { query as db } from "../db.js";
 import { requireAuth } from "../middlewares/auth.js";
+import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
 
@@ -96,4 +98,49 @@ router.get("/me", requireAuth, async (req, res) => {
   return res.json({ user: pub(user) });
 });
 
+/** GOOGLE LOGIN */
+router.post("/google", async (req, res) => {
+  try {
+    const { idToken } = req.body || {};
+    if (!idToken) return res.status(400).json({ message: "idToken is required" });
+
+    const audiences = (process.env.GOOGLE_CLIENT_IDS || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (audiences.length === 0) {
+      return res.status(500).json({ message: "Server not configured for Google login" });
+    }
+
+    const client = new OAuth2Client();
+    const ticket = await client.verifyIdToken({ idToken, audience: audiences });
+    const payload = ticket.getPayload();
+    if (!payload) return res.status(401).json({ message: "Invalid Google token" });
+
+    const { email, email_verified, given_name, family_name  } = payload;
+    if (!email || !email_verified) {
+      return res.status(401).json({ message: "Google email is not verified" });
+    }
+
+    const found = await db("SELECT * FROM users WHERE email = $1", [email]);
+    let user = found.rows[0];
+
+    if (!user) {
+      const randomPass = crypto.randomUUID();
+      const hash = await bcrypt.hash(randomPass, 10);
+      const ins = await db(
+        `INSERT INTO users (first_name, last_name, email, password_hash)
+         VALUES ($1,$2,$3,$4) RETURNING *`,
+        [given_name || "", family_name || "", email.toLowerCase(), hash]
+      );
+      user = ins.rows[0];
+    }
+
+    const token = sign(user.id);
+    return res.json({ token, user: pub(user) });
+  } catch (e) {
+    console.error("google auth error:", e);
+    return res.status(401).json({ message: "Failed to authenticate with Google" });
+  }
+});
 export default router;
