@@ -32,9 +32,10 @@
       "expo-secure-store"
     ],
     "extra": {
-      "googleIosClientId": "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com",
-      "googleAndroidClientId": "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com",
-      "googleWebClientId": "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com"
+      "googleIosClientId": "",
+      "googleAndroidClientId": "",
+      "googleExpoClientId": "848241555551-qo1ca38lr1dk38pet07qam4hf7p108gf.apps.googleusercontent.com",
+      "googleWebClientId": "848241555551-qo1ca38lr1dk38pet07qam4hf7p108gf.apps.googleusercontent.com"
     }
   }
 }

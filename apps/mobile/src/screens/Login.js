@@ -161,8 +161,7 @@ export default function Login({ navigation, route }) {
          onPress={() => promptAsync()}
           style={{ alignSelf: "center", marginTop: 10 }}
         >
-          <Text style={{ color: theme.colors.textMuted }}>Створити акаунт з Google</Text>
-        </Pressable>
+         </Pressable>
       </ScrollView>
     </View>
   );
