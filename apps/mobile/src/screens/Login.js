@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import * as AuthSession from "expo-auth-session";
+import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
 
 import AuthInput from "../components/AuthInput";
@@ -20,12 +20,6 @@ const P = {
   link: theme.colors.accentWarm
 };
 
-const discovery = {
-  authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenEndpoint: "https://oauth2.googleapis.com/token",
-  revocationEndpoint: "https://oauth2.googleapis.com/revoke"
-};
-
 export default function Login({ navigation, route }) {
   const prefill = route?.params?.emailPrefill || "";
   const justRegistered = !!route?.params?.justRegistered;
@@ -40,16 +34,21 @@ export default function Login({ navigation, route }) {
     typeof error === "object" ? error?.message : error ? String(error) : null;
 
   const extra = Constants?.expoConfig?.extra || {};
-  const redirectUri = AuthSession.makeRedirectUri({ useProxy: true, scheme: "bookloop" });
-  console.log("redirectUri used:", redirectUri);
+    const appCfg = Constants?.expoConfig || {};
+    const owner = String(appCfg.owner || "sikorskyii").replace(/^@/, "");
+    const slug = String(appCfg.slug || "bookloop");
+
+    const redirectUri = `https://auth.expo.dev/@${owner}/${slug}`;
+    console.log("redirectUri used:", redirectUri);
 
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
-      clientId: extra.googleExpoClientId, 
+      expoClientId: extra.googleExpoClientId, 
       iosClientId: extra.googleIosClientId || undefined, 
       androidClientId: extra.googleAndroidClientId || undefined, 
       webClientId: extra.googleWebClientId,
-      responseType: AuthSession.ResponseType.IdToken,
+      responseType: "id_token",
+      redirectUri,
       scopes: ["openid", "email", "profile"],
       extraParams: { prompt: "select_account" }
     },
@@ -58,10 +57,13 @@ export default function Login({ navigation, route }) {
 
   const [googleErr, setGoogleErr] = useState(null);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!response) return;
+
     if (response.type === "success") {
-      const idToken = response.params?.id_token;
+      const idToken =
+        response.params?.id_token || response.authentication?.idToken;
+
       if (idToken) {
         (async () => {
           const r = await googleLogin(idToken);
