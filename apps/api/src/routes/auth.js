@@ -60,7 +60,7 @@ router.post(
     );
 
     const user = rows[0];
-    return res.status(201).json({ token, user: pub(user) });
+    return res.status(201).json({ user: pub(user) });
   }
 );
 
