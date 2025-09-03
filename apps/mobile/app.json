@@ -39,9 +39,6 @@
       "eas": {
         "projectId": "866668a4-5ea6-40e0-a383-a18394d836c5"
       }
-    },
-    "web": {
-      "output": "static"   
     }
   }
 }
