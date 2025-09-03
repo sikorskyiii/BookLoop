@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import Constants from "expo-constants";
 import AuthInput from "../components/AuthInput";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
+
+ 
+WebBrowser.maybeCompleteAuthSession();
 
 const P = {
   bg: theme.colors.bg,
@@ -19,10 +25,31 @@ export default function Login({ navigation, route }) {
 
   const [email, setEmail] = useState(prefill);
   const [pass, setPass] = useState("");
-  const { login, loading, error } = useAuth();
+  const { login, googleLogin, loading, error } = useAuth();
 
   const fieldErr = (error && error.errors) || {};
   const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
+
+  const extra = Constants?.expoConfig?.extra || {};
+  const [request, response, promptAsync] = Google.useAuthRequest({
+     iosClientId: extra.googleIosClientId,
+     androidClientId: extra.googleAndroidClientId,
+     webClientId: extra.googleWebClientId,
+     responseType: "id_token",
+     extraParams: { prompt: "select_account" },
+  });
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const idToken = response?.params?.id_token || response?.authentication?.idToken;
+      if (idToken) {
+        (async () => {
+          const ok = await googleLogin(idToken);
+          if (ok?.ok) navigation.replace("Main");
+        })();
+      }
+    }
+  }, [response]);
 
   async function onSubmit() {
     const res = await login({ email, password: pass });
@@ -110,6 +137,31 @@ export default function Login({ navigation, route }) {
             Зареєструватись
           </Text>
         </Text>
+       <View style={{ height: 18 }} />
+        <Pressable
+         disabled={!request || loading}
+        onPress={() => promptAsync()}
+         style={{
+           backgroundColor: "#2E2728",
+           borderRadius: 12,
+           height: 48,
+           alignItems: "center",
+           justifyContent: "center",
+            opacity: !request || loading ? 0.6 : 1
+         }}
+       >
+         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+           <Ionicons name="logo-google" size={20} color="#ffffff" />
+           <Text style={{ color: "#ffffff", fontWeight: "700" }}>Увійти з Google</Text>
+        </View>
+        </Pressable>
+       <Pressable
+          disabled={!request || loading}
+         onPress={() => promptAsync()}
+          style={{ alignSelf: "center", marginTop: 10 }}
+        >
+          <Text style={{ color: theme.colors.textMuted }}>Створити акаунт з Google</Text>
+        </Pressable>
       </ScrollView>
     </View>
   );

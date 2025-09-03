@@ -2,6 +2,7 @@ import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { setAuthToken } from "../api/client";
 import { loginApi, registerApi, meApi } from "../api/auth";
+import { googleLoginApi } from "../api/auth";
 
 const TOKEN_KEY = "auth_token_v1";
 
