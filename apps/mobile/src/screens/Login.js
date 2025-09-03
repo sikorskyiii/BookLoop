@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
 import Constants from "expo-constants";
 import AuthInput from "../components/AuthInput";
 import { useAuth } from "../store/useAuth";
@@ -31,26 +32,27 @@ export default function Login({ navigation, route }) {
   const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
 
   const extra = Constants?.expoConfig?.extra || {};
-  const [request, response, promptAsync] = Google.useAuthRequest({
-      expoClientId:   extra.googleExpoClientId,
-    iosClientId: extra.googleIosClientId,
-     androidClientId: extra.googleAndroidClientId,
-     webClientId: extra.googleWebClientId,
-     responseType: "id_token",
-     extraParams: { prompt: "select_account" },
-  });
+  const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
+  const [request, response, promptAsync] = Google.useAuthRequest(
+  {
+    expoClientId:    extra.googleExpoClientId,     // WEB client id для Expo Go
+    iosClientId:     extra.googleIosClientId || undefined,
+    androidClientId: extra.googleAndroidClientId || undefined,
+    webClientId:     extra.googleWebClientId,
+    responseType: "id_token",
+    redirectUri,                                  // ← явний redirect
+    extraParams: { prompt: "select_account" }
+  },
+  { useProxy: true }                              // ← примушуємо Expo proxy
+);
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      const idToken = response?.params?.id_token || response?.authentication?.idToken;
-      if (idToken) {
-        (async () => {
-          const ok = await googleLogin(idToken);
-          if (ok?.ok) navigation.replace("Main");
-        })();
-      }
-    }
-  }, [response]);
+useEffect(() => {
+    if (response && response.type !== "success") {
+    console.log("Google response", JSON.stringify(response, null, 2));
+  }
+}, [response]);
+
+
 
   async function onSubmit() {
     const res = await login({ email, password: pass });
