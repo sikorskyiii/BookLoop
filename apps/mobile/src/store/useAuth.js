@@ -31,16 +31,13 @@ export const useAuth = create((set, get) => ({
   register: async ({ firstName, lastName, email, password }) => {
     set({ loading: true, error: null });
     try {
-      const { token, user } = await registerApi({ firstName, lastName, email, password });
-      setAuthToken(token);
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
-      set({ token, user, loading: false, error: null });
-      return { ok: true };
+       await registerApi({ firstName, lastName, email, password });
+       set({ loading: false, error: null });
+       return { ok: true };
     } catch (e) {
-      const apiErr = e?.response?.data || {};
-      const err = typeof apiErr === "object" ? apiErr : { message: "Помилка реєстрації" };
-      set({ error: err, loading: false });
-      return { ok: false, error: err };
+       const err = e?.response?.data || { message: "Помилка реєстрації" };
+       set({ error: err, loading: false });
+       return { ok: false, error: err };
     }
   },
 
