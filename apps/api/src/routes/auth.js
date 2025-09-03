@@ -37,7 +37,7 @@ router.post(
   body("firstName").customSanitizer(trimStr).isLength({ min: 1 }).withMessage("Вкажіть імʼя"),
   body("lastName").customSanitizer(trimStr).isLength({ min: 1 }).withMessage("Вкажіть прізвище"),
   body("email").customSanitizer(normalizeEmail).isEmail().withMessage("Невалідний email"),
-  body("password").isLength({ min: 6 }).withMessage("Мінімум 6 символів у паролі"),
+  body("password").isLength({ min: 8 }).withMessage("Мінімум 8 символів у паролі"),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
