@@ -5,11 +5,12 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import Constants from "expo-constants";
+
 import AuthInput from "../components/AuthInput";
+import DividerLabel from "../components/DividerLabel";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
-import DividerLabel from "../components/DividerLabel";
- 
+
 WebBrowser.maybeCompleteAuthSession();
 
 const P = {
@@ -26,33 +27,53 @@ export default function Login({ navigation, route }) {
 
   const [email, setEmail] = useState(prefill);
   const [pass, setPass] = useState("");
+
   const { login, googleLogin, loading, error } = useAuth();
 
   const fieldErr = (error && error.errors) || {};
-  const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
+  const generalMsg =
+    typeof error === "object" ? error?.message : error ? String(error) : null;
+
 
   const extra = Constants?.expoConfig?.extra || {};
   const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
+
   const [request, response, promptAsync] = Google.useAuthRequest(
-  {
-    expoClientId:    extra.googleExpoClientId,     
-    iosClientId:     extra.googleIosClientId || undefined,
-    androidClientId: extra.googleAndroidClientId || undefined,
-    webClientId:     extra.googleWebClientId,
-    responseType: "id_token",
-    redirectUri,                                
-    extraParams: { prompt: "select_account" }
-  },
-  { useProxy: true }                
-);
+    {
+      expoClientId: extra.googleExpoClientId, 
+      iosClientId: extra.googleIosClientId || undefined, 
+      androidClientId: extra.googleAndroidClientId || undefined, 
+      webClientId: extra.googleWebClientId,
+      responseType: "id_token",
+      redirectUri,
+      scopes: ["openid", "email", "profile"],
+      extraParams: { prompt: "select_account" }
+    },
+    { useProxy: true }
+  );
 
-useEffect(() => {
-    if (response && response.type !== "success") {
-    console.log("Google response", JSON.stringify(response, null, 2));
-  }
-}, [response]);
+  const [googleErr, setGoogleErr] = useState(null);
 
-
+  useEffect(() => {
+    if (!response) return;
+    if (response.type === "success") {
+      const idToken =
+        response.params?.id_token || response.authentication?.idToken;
+      if (idToken) {
+        (async () => {
+          const r = await googleLogin(idToken);
+          if (r?.ok) navigation.replace("Main");
+          else setGoogleErr(r?.error?.message || "Не вдалося увійти через Google");
+        })();
+      } else {
+        setGoogleErr("Не отримано id_token від Google");
+      }
+    } else if (response.type === "error") {
+      setGoogleErr(response.error?.message || "Помилка Google авторизації");
+    } else if (response.type === "cancel") {
+      setGoogleErr(null); 
+    }
+  }, [response]);
 
   async function onSubmit() {
     const res = await login({ email, password: pass });
@@ -62,7 +83,9 @@ useEffect(() => {
   return (
     <View style={{ flex: 1, backgroundColor: P.bg }}>
       <Pressable
-        onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Entry"))}
+        onPress={() =>
+          navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Entry")
+        }
         style={{ paddingTop: 74, paddingHorizontal: 14 }}
       >
         <Ionicons name="chevron-back" size={26} color="#6F645B" />
@@ -88,9 +111,9 @@ useEffect(() => {
           </Text>
         )}
 
-        {generalMsg && (
+        {(generalMsg || googleErr) && (
           <Text style={{ color: theme.colors.danger, textAlign: "center", marginBottom: 8 }}>
-            {generalMsg}
+            {generalMsg || googleErr}
           </Text>
         )}
 
@@ -133,38 +156,31 @@ useEffect(() => {
 
         <Text style={{ textAlign: "center", color: theme.colors.textMuted, marginTop: 24 }}>
           Немає акаунту?{" "}
-          <Text
-            onPress={() => navigation.navigate("Register")}
-            style={{ color: P.link, fontWeight: "600" }}
-          >
+          <Text onPress={() => navigation.navigate("Register")} style={{ color: P.link, fontWeight: "600" }}>
             Зареєструватись
           </Text>
         </Text>
-       <DividerLabel label="Вхід через" style={{ marginTop: 18 }} />
-       <View style={{ height: 18 }} />
+
+        <DividerLabel label="Вхід через" style={{ marginTop: 18 }} />
+
+        <View style={{ height: 18 }} />
         <Pressable
-         disabled={!request || loading}
-        onPress={() => promptAsync()}
-         style={{
-           backgroundColor: "#2E2728",
-           borderRadius: 12,
-           height: 48,
-           alignItems: "center",
-           justifyContent: "center",
-            opacity: !request || loading ? 0.6 : 1
-         }}
-       >
-         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-           <Ionicons name="logo-google" size={20} color="#ffffff" />
-           <Text style={{ color: "#ffffff", fontWeight: "700" }}>Увійти з Google</Text>
-        </View>
-        </Pressable>
-       <Pressable
           disabled={!request || loading}
-         onPress={() => promptAsync()}
-          style={{ alignSelf: "center", marginTop: 10 }}
+          onPress={() => promptAsync()}
+          style={{
+            backgroundColor: "#2E2728",
+            borderRadius: 12,
+            height: 48,
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: !request || loading ? 0.6 : 1
+          }}
         >
-         </Pressable>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Ionicons name="logo-google" size={20} color="#ffffff" />
+            <Text style={{ color: "#ffffff", fontWeight: "700" }}>Увійти з Google</Text>
+          </View>
+        </Pressable>
       </ScrollView>
     </View>
   );
