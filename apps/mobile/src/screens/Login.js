@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
-import { Ionicons, FontAwesome } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "../components/AuthInput";
-import DividerLabel from "../components/DividerLabel";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
 
@@ -11,14 +10,19 @@ const P = {
   title: "#B49783",
   btnFill: theme.colors.primary,
   btnFillText: "#2D2A28",
-  link: theme.colors.accentWarm,
-  googleBtn: theme.colors.googleBtn
+  link: theme.colors.accentWarm
 };
 
-export default function Login({ navigation }) {
-  const [email, setEmail] = useState("");
+export default function Login({ navigation, route }) {
+  const prefill = route?.params?.emailPrefill || "";
+  const justRegistered = !!route?.params?.justRegistered;
+
+  const [email, setEmail] = useState(prefill);
   const [pass, setPass] = useState("");
   const { login, loading, error } = useAuth();
+
+  const fieldErr = (error && error.errors) || {};
+  const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
 
   async function onSubmit() {
     const res = await login({ email, password: pass });
@@ -27,28 +31,58 @@ export default function Login({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: P.bg }}>
-    <Pressable
-      onPress={() =>
-      navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Entry")
-    }
-      style={{ paddingTop: 74, paddingHorizontal: 14 }} >
-     <Ionicons name="chevron-back" size={26} color="#6F645B" />
-   </Pressable>
+      <Pressable
+        onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Entry"))}
+        style={{ paddingTop: 74, paddingHorizontal: 14 }}
+      >
+        <Ionicons name="chevron-back" size={26} color="#6F645B" />
+      </Pressable>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 6 }}>
-        <Text style={{ textAlign: "center", fontSize: 24, fontWeight: "800", color: P.title,marginTop: 175 , marginBottom: 18 }}>
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: 24,
+            fontWeight: "800",
+            color: P.title,
+            marginTop: 175,
+            marginBottom: 18
+          }}
+        >
           Вхід в акаунт
         </Text>
 
-        <AuthInput placeholder="Електронна пошта" value={email} onChangeText={setEmail} keyboardType="email-address" />
+        {justRegistered && (
+          <Text style={{ color: theme.colors.textMuted, textAlign: "center", marginBottom: 8 }}>
+            Акаунт створено. Увійдіть, будь ласка.
+          </Text>
+        )}
+
+        {generalMsg && (
+          <Text style={{ color: theme.colors.danger, textAlign: "center", marginBottom: 8 }}>
+            {generalMsg}
+          </Text>
+        )}
+
+        <AuthInput
+          placeholder="Електронна пошта"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
+        {!!fieldErr.email && (
+          <Text style={{ color: theme.colors.danger, marginTop: 6 }}>{fieldErr.email}</Text>
+        )}
+
         <View style={{ height: 12 }} />
         <AuthInput placeholder="Пароль" value={pass} onChangeText={setPass} secure />
+        {!!fieldErr.password && (
+          <Text style={{ color: theme.colors.danger, marginTop: 6 }}>{fieldErr.password}</Text>
+        )}
 
         <Pressable onPress={() => {}} style={{ alignSelf: "flex-end", marginTop: 8 }}>
           <Text style={{ color: P.link, fontWeight: "600" }}>Забули пароль?</Text>
         </Pressable>
-
-        {!!error && <Text style={{ color: theme.colors.danger, marginTop: 8 }}>{String(error)}</Text>}
 
         <Pressable
           onPress={onSubmit}
@@ -67,14 +101,15 @@ export default function Login({ navigation }) {
           </Text>
         </Pressable>
 
-        <DividerLabel label="Вхід через" style={{ marginTop: 18 }} />
-
-        <Pressable
-          onPress={() => {}}
-          style={{ marginTop: 14, backgroundColor: P.googleBtn, borderRadius: 12, height: 48, alignItems: "center", justifyContent: "center" }}
-        >
-          <FontAwesome name="google" size={20} color="#ffffff" />
-        </Pressable>
+        <Text style={{ textAlign: "center", color: theme.colors.textMuted, marginTop: 24 }}>
+          Немає акаунту?{" "}
+          <Text
+            onPress={() => navigation.navigate("Register")}
+            style={{ color: P.link, fontWeight: "600" }}
+          >
+            Зареєструватись
+          </Text>
+        </Text>
       </ScrollView>
     </View>
   );
