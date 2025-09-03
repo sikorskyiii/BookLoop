@@ -29,9 +29,15 @@ export default function Register({ navigation }) {
       email:email,
       password: pass
     });
-    if (res.ok) navigation.replace("Main");
+    if (res.ok) 
+    { 
+        navigation.reset({        
+        index: 0,
+        routes: [{ name: "Login", params: { emailPrefill: email, justRegistered: true } }]
+        });;
+    }
   }
-
+  
   return (
     <View style={{ flex: 1, backgroundColor: P.bg }}>
       <Pressable
