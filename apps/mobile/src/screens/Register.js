@@ -2,7 +2,6 @@ import { useState } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import AuthInput from "../components/AuthInput";
-import DividerLabel from "../components/DividerLabel";
 import { theme } from "../theme/theme";
 import { useAuth } from "../store/useAuth";
 
@@ -37,7 +36,7 @@ export default function Register({ navigation }) {
         });;
     }
   }
-  
+
   return (
     <View style={{ flex: 1, backgroundColor: P.bg }}>
       <Pressable
@@ -79,22 +78,6 @@ export default function Register({ navigation }) {
           <Text style={{ color: P.btnFillText, fontSize: 16, fontWeight: "800" }}>
             {loading ? "Зачекайте…" : "Зареєструватись"}
           </Text>
-        </Pressable>
-
-        <DividerLabel label="Реєстрація через" style={{ marginTop: 18 }} />
-
-        <Pressable
-          onPress={() => {}}
-          style={{
-            marginTop: 14,
-            backgroundColor: P.googleBtn,
-            borderRadius: 12,
-            height: 48,
-            alignItems: "center",
-            justifyContent: "center"
-          }}
-        >
-          <FontAwesome name="google" size={20} color="#ffffff" />
         </Pressable>
       </ScrollView>
     </View>

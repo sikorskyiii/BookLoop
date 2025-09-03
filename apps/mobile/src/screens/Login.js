@@ -7,7 +7,7 @@ import Constants from "expo-constants";
 import AuthInput from "../components/AuthInput";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
-
+import DividerLabel from "../components/DividerLabel";
  
 WebBrowser.maybeCompleteAuthSession();
 
@@ -137,6 +137,7 @@ export default function Login({ navigation, route }) {
             Зареєструватись
           </Text>
         </Text>
+       <DividerLabel label="Вхід через" style={{ marginTop: 18 }} />
        <View style={{ height: 18 }} />
         <Pressable
          disabled={!request || loading}
