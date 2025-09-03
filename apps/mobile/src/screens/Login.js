@@ -35,15 +35,15 @@ export default function Login({ navigation, route }) {
   const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
   const [request, response, promptAsync] = Google.useAuthRequest(
   {
-    expoClientId:    extra.googleExpoClientId,     // WEB client id для Expo Go
+    expoClientId:    extra.googleExpoClientId,     
     iosClientId:     extra.googleIosClientId || undefined,
     androidClientId: extra.googleAndroidClientId || undefined,
     webClientId:     extra.googleWebClientId,
     responseType: "id_token",
-    redirectUri,                                  // ← явний redirect
+    redirectUri,                                
     extraParams: { prompt: "select_account" }
   },
-  { useProxy: true }                              // ← примушуємо Expo proxy
+  { useProxy: true }                
 );
 
 useEffect(() => {
