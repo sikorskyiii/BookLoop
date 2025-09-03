@@ -14,3 +14,7 @@ export async function meApi() {
   const { data } = await api.get("/auth/me");
   return data; 
 }
+export async function googleLoginApi(idToken) {
+  const { data } = await api.post("/auth/google", { idToken });
+  return data; 
+}
