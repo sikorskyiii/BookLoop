@@ -42,8 +42,7 @@ export default function Profile({ navigation }){
         <View style={{ backgroundColor: theme.colors.card, borderRadius: 16, borderWidth:1, borderColor: theme.colors.border, padding:16 }}>
           <Row label="Імʼя" value={user.firstName} />
           <Row label="Прізвище" value={user.lastName} />
-          <Row label="Email" value={user.email} />
-      
+          <Row label="Email" value={user.email} />    
         </View>
         <Pressable
           onPress={logout}
