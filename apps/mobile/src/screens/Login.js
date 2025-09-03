@@ -32,7 +32,8 @@ export default function Login({ navigation, route }) {
 
   const extra = Constants?.expoConfig?.extra || {};
   const [request, response, promptAsync] = Google.useAuthRequest({
-     iosClientId: extra.googleIosClientId,
+      expoClientId:   extra.googleExpoClientId,
+    iosClientId: extra.googleIosClientId,
      androidClientId: extra.googleAndroidClientId,
      webClientId: extra.googleWebClientId,
      responseType: "id_token",
