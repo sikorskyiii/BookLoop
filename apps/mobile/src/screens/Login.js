@@ -41,7 +41,7 @@ export default function Login({ navigation, route }) {
     const redirectUri = `https://auth.expo.dev/@${owner}/${slug}`;
     console.log("redirectUri used:", redirectUri);
 
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+  const [request, response, promptAsync] = Google.useAuthRequest(
     {
       expoClientId: extra.googleExpoClientId, 
       iosClientId: extra.googleIosClientId || undefined, 
@@ -52,7 +52,7 @@ export default function Login({ navigation, route }) {
       scopes: ["openid", "email", "profile"],
       extraParams: { prompt: "select_account" }
     },
-    discovery
+    { useProxy: false }
   );
 
   const [googleErr, setGoogleErr] = useState(null);
