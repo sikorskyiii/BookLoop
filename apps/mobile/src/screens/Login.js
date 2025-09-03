@@ -38,7 +38,7 @@ export default function Login({ navigation, route }) {
     const owner = String(appCfg.owner || "sikorskyii").replace(/^@/, "");
     const slug = String(appCfg.slug || "bookloop");
 
-    const redirectUri = `https://auth.expo.dev/@${owner}/${slug}`;
+    const redirectUri = `https://auth.expo.io/@${owner}/${slug}`;
     console.log("redirectUri used:", redirectUri);
 
   const [request, response, promptAsync] = Google.useAuthRequest(
