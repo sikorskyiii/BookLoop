@@ -166,7 +166,7 @@ export default function Login({ navigation, route }) {
         <View style={{ height: 18 }} />
         <Pressable
           disabled={!request || loading}
-          onPress={() => promptAsync()}
+          onPress={() => promptAsync({useProxy: true, showInRecents: true})}
           style={{
             backgroundColor: "#2E2728",
             borderRadius: 12,
