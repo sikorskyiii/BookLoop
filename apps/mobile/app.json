@@ -7,7 +7,10 @@
     "ios": { "bundleIdentifier": "com.sikorskyiii.bookloop" },
     "android": { "package": "com.sikorskyiii.bookloop" },
     "web": { "bundler": "metro", "output": "single" },
-    "plugins": ["expo-secure-store"],
+    "plugins": [
+      "expo-secure-store",
+      "@react-native-async-storage/async-storage"
+    ],
     "extra": {
       "firebase": {
         "apiKey":        "AIzaSyCtWbTEZqMUKo09N_5n1BPRMHKZCKrEW74",
