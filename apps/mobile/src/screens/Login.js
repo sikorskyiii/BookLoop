@@ -6,6 +6,7 @@ import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import Constants from "expo-constants";
 
+import { Platform } from "react-native";
 import AuthInput from "../components/AuthInput";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
@@ -35,13 +36,16 @@ export default function Login({ navigation, route }) {
   const fieldErr = (error && error.errors) || {};
   const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
 
-  // ---- Google via Firebase ----
+
   const extra = Constants?.expoConfig?.extra || {};
   const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
+  const webId = extra?.firebase?.googleWebClientId;
   const [request, response, promptAsync] = Google.useAuthRequest(
     {
-      expoClientId: extra?.firebase?.googleWebClientId, // ВАЖЛИВО: Web client ID з Firebase
-      responseType: "id_token",
+      expoClientId: webId,   
+      iosClientId: webId,        
+      androidClientId: webId,    
+       webClientId: webId,       
       redirectUri,
       scopes: ["openid", "email", "profile"],
       extraParams: { prompt: "select_account" }
