@@ -8,6 +8,15 @@
     "android": { "package": "com.sikorskyiii.bookloop" },
     "web": { "bundler": "metro", "output": "single" },
     "plugins": ["expo-secure-store"],
-    "extra": { }
+    "extra": {
+      "firebase": {
+        "apiKey":        "AIzaSyCtWbTEZqMUKo09N_5n1BPRMHKZCKrEW74",
+        "authDomain":    "bookloop-af1c8.firebaseapp.com",
+        "projectId":     "bookloop-af1c8",
+        "appId":         "1:921038747639:web:68c35241ad523cec38a0f2",
+        "messagingSenderId": "921038747639",
+        "storageBucket": "bookloop-af1c8.firebasestorage.app"
+      }
+    }
   }
 }

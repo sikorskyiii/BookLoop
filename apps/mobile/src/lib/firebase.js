@@ -1,20 +1,15 @@
-import 'react-native-get-random-values';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
-
-const extra = (Constants.expoConfig && Constants.expoConfig.extra) ? Constants.expoConfig.extra : {};
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: extra.FIREBASE_API_KEY,
-  authDomain: extra.FIREBASE_AUTH_DOMAIN,
-  projectId: extra.FIREBASE_PROJECT_ID,
-  appId: extra.FIREBASE_APP_ID,
+  apiKey: "AIzaSyCtWbTEZqMUKo09N_5n1BPRMHKZCKrEW74",
+  authDomain: "bookloop-af1c8.firebaseapp.com",
+  projectId: "bookloop-af1c8",
+  storageBucket: "bookloop-af1c8.firebasestorage.app",
+  messagingSenderId: "921038747639",
+  appId: "1:921038747639:web:68c35241ad523cec38a0f2",
+  measurementId: "G-3HE42XHYFJ"
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
