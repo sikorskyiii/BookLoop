@@ -15,7 +15,8 @@
         "projectId":     "bookloop-af1c8",
         "appId":         "1:921038747639:web:68c35241ad523cec38a0f2",
         "messagingSenderId": "921038747639",
-        "storageBucket": "bookloop-af1c8.firebasestorage.app"
+        "storageBucket": "bookloop-af1c8.firebasestorage.app",
+        "googleWebClientId": "921038747639-to60mcmk6vgj8m1k171fojb8fq1ebb0r.apps.googleusercontent.com"
       }
     }
   }
