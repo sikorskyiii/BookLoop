@@ -39,20 +39,19 @@ export default function Login({ navigation, route }) {
 
   const extra = Constants?.expoConfig?.extra || {};
   const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
-  const webId = extra?.firebase?.googleWebClientId;
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      expoClientId: webId,   
-      iosClientId: webId,        
-      androidClientId: webId,    
-       webClientId: webId,       
-      redirectUri,
-      scopes: ["openid", "email", "profile"],
-      extraParams: { prompt: "select_account" }
-    },
-    { useProxy: true }
-  );
-
+const [request, response, promptAsync] = Google.useAuthRequest(
+  {
+    expoClientId: extra?.firebase?.googleWebClientId,
+    iosClientId:  extra?.firebase?.googleWebClientId,  
+    androidClientId: extra?.firebase?.googleWebClientId,
+    webClientId: extra?.firebase?.googleWebClientId,
+    responseType: "id_token",
+    redirectUri,
+    scopes: ["openid", "email", "profile"],
+    extraParams: { prompt: "select_account" }
+  },
+  { useProxy: true }
+);
   useEffect(() => {
     (async () => {
       if (!response) return;
