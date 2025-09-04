@@ -56,6 +56,20 @@ export const useAuth = create((set, get) => ({
       return { ok: false, error: err };
     }
   },
+   googleLogin: async (firebaseIdToken) => {
+    set({ loading: true, error: null });
+    try {
+      const { token, user } = await googleLoginApi({ idToken: firebaseIdToken });
+      setAuthToken(token);
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      set({ token, user, loading: false, error: null });
+      return { ok: true };
+    } catch (e) {
+      const err = e?.response?.data || { message: "Помилка входу через Google" };
+      set({ error: err, loading: false });
+      return { ok: false, error: err };
+    }
+  },
   logout: async () => {
     setAuthToken(null);
     await SecureStore.deleteItemAsync(TOKEN_KEY);
