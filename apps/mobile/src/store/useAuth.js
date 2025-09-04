@@ -2,7 +2,6 @@ import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 import { setAuthToken } from "../api/client";
 import { loginApi, registerApi, meApi } from "../api/auth";
-import { googleLoginApi } from "../api/auth";
 
 const TOKEN_KEY = "auth_token_v1";
 
@@ -55,22 +54,6 @@ export const useAuth = create((set, get) => ({
       const err = typeof apiErr === "object" ? apiErr : { message: "Невірні дані входу" };
       set({ error: err, loading: false });
       return { ok: false, error: err };
-    }
-  },
-  googleLogin: async (idToken) => {
-      set({ loading: true, error: null });
-    try {
-      const { token, user } = await googleLoginApi(idToken);
-        setAuthToken(token);
-        await SecureStore.setItemAsync(TOKEN_KEY, token);
-        set({ token, user, loading: false, error: null });
-        return { ok: true };
-    } catch (e) {
-      const apiErr = e?.response?.data || {};
-      const err =
-        typeof apiErr === "object" ? apiErr : { message: "Не вдалося увійти через Google" };
-        set({ error: err, loading: false });
-        return { ok: false, error: err };
     }
   },
   logout: async () => {
