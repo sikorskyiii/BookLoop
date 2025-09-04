@@ -37,14 +37,16 @@ export default function Login({ navigation, route }) {
   const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
 
 
-  const extra = Constants?.expoConfig?.extra || {};
-  const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
+const extra = (Constants?.expoConfig?.extra) ?? (Constants?.manifestExtra) ?? (Constants?.manifest?.extra) ?? {};
+const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
+const webId = extra?.firebase?.googleWebClientId;
+
 const [request, response, promptAsync] = Google.useAuthRequest(
   {
-    expoClientId: extra?.firebase?.googleWebClientId,
-    iosClientId:  extra?.firebase?.googleWebClientId,  
-    androidClientId: extra?.firebase?.googleWebClientId,
-    webClientId: extra?.firebase?.googleWebClientId,
+    expoClientId: webId,
+    iosClientId: webId,
+    androidClientId: webId,
+    webClientId: webId,
     responseType: "id_token",
     redirectUri,
     scopes: ["openid", "email", "profile"],
