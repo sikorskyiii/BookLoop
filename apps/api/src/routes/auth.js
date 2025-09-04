@@ -96,4 +96,44 @@ router.get("/me", requireAuth, async (req, res) => {
   return res.json({ user: pub(user) });
 });
 
+/** GOOGLE */
+router.post("/google", async (req, res) => {
+  try {
+    const { idToken } = req.body; // Firebase ID token
+    if (!idToken) return res.status(400).json({ message: "Missing idToken" });
+
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const email = decoded.email;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const name = decoded.name || "";
+    const [firstName, ...rest] = name.trim().split(" ");
+    const lastName = rest.join(" ");
+    const firebaseUid = decoded.uid;
+
+    const upsertSql = `
+      INSERT INTO users (email, first_name, last_name, firebase_uid)
+      VALUES ($1, COALESCE($2,''), COALESCE($3,''), $4)
+      ON CONFLICT (email) DO UPDATE
+        SET first_name = EXCLUDED.first_name,
+            last_name  = EXCLUDED.last_name,
+            firebase_uid = EXCLUDED.firebase_uid
+      RETURNING id, email, first_name, last_name;
+    `;
+    const { rows } = await query(upsertSql, [email, firstName, lastName, firebaseUid]);
+    const user = rows[0];
+
+    const token = jwt.sign(
+      { uid: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
+
+    res.json({ token, user });
+  } catch (e) {
+    console.error("google auth error:", e);
+    res.status(401).json({ message: "Invalid Firebase token" });
+  }
+});
+
 export default router;
