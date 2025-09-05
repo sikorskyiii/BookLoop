@@ -37,11 +37,7 @@ export default function Login({ navigation, route }) {
   const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
 
 
-const extraRoot =
-  (Constants?.expoConfig?.extra) ??
-  Constants?.manifestExtra ??
-  (Constants?.manifest?.extra) ??
-  {};
+const extraRoot = (Constants?.expoConfig?.extra) ?? Constants?.manifestExtra ?? (Constants?.manifest?.extra) ?? {};
 const fb = extraRoot.firebase || {};
 
 const GOOGLE_WEB_CLIENT_ID =
@@ -51,21 +47,28 @@ const IOS_CLIENT_ID =
 const ANDROID_CLIENT_ID =
   fb.androidClientId || process.env.EXPO_PUBLIC_FIREBASE_ANDROID_CLIENT_ID;
 
-const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
+  const nonce = Crypto.randomUUID?.() || `${Date.now()}.${Math.random().toString(36).slice(2)}`;
 
-const [request, response, promptAsync] = Google.useAuthRequest(
-  {
-    expoClientId: GOOGLE_WEB_CLIENT_ID,   // для Expo proxy
-    iosClientId: IOS_CLIENT_ID,           // щоб iOS не скаржився
-    androidClientId: ANDROID_CLIENT_ID,   // опціонально
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-    responseType: "id_token",
-    redirectUri,
-    scopes: ["openid", "email", "profile"],
-    extraParams: { prompt: "select_account" }
-  },
-  { useProxy: true }
-);
+console.log("OAuth cfg:", {
+  hasWebId: !!GOOGLE_WEB_CLIENT_ID,
+  iosId: IOS_CLIENT_ID,
+  webId: GOOGLE_WEB_CLIENT_ID
+});
+
+if (!GOOGLE_WEB_CLIENT_ID) {
+  console.warn("❌ Немає GOOGLE_WEB_CLIENT_ID. Перевір .env або extra.firebase.googleWebClientId.");
+}
+
+
+const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+  expoClientId: GOOGLE_WEB_CLIENT_ID,
+  iosClientId: IOS_CLIENT_ID,
+  androidClientId: ANDROID_CLIENT_ID,
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+  scopes: ["openid", "email", "profile"],
+  extraParams: { prompt: "select_account", nonce } // +++
+});
+
   useEffect(() => {
     (async () => {
       if (!response) return;
@@ -78,6 +81,8 @@ const [request, response, promptAsync] = Google.useAuthRequest(
         const firebaseIdToken = await userCred.user.getIdToken();
         const r = await googleLogin(firebaseIdToken);
         if (r?.ok) navigation.replace("Main");
+      } else  if (response.type === "error") {
+        console.log("OAuth error:", response.params || response);
       }
     })();
   }, [response]);
