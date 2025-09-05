@@ -81,7 +81,8 @@ const [request, response, promptAsync] = useAuthRequest(
     responseType: ResponseType.IdToken,
     redirectUri,
      scopes: ["openid", "email", "profile"],
-    extraParams: { prompt: "select_account", nonce }
+    extraParams: { prompt: "select_account", nonce },
+    usePKCE: false 
    },
    discovery
   );
