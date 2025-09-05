@@ -37,16 +37,14 @@ export default function Login({ navigation, route }) {
   const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
 
 
-const extra = (Constants?.expoConfig?.extra) ?? (Constants?.manifestExtra) ?? (Constants?.manifest?.extra) ?? {};
+const extra = (Constants?.expoConfig?.extra) ?? Constants?.manifestExtra ?? (Constants?.manifest?.extra) ?? {};
 const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
-const webId = extra?.firebase?.googleWebClientId;
 
 const [request, response, promptAsync] = Google.useAuthRequest(
   {
-    expoClientId: webId,
-    iosClientId: webId,
-    androidClientId: webId,
-    webClientId: webId,
+    expoClientId:   extra?.firebase?.googleWebClientId, 
+    iosClientId:    extra?.firebase?.iosClientId,       
+    webClientId:    extra?.firebase?.googleWebClientId,
     responseType: "id_token",
     redirectUri,
     scopes: ["openid", "email", "profile"],
@@ -61,14 +59,9 @@ const [request, response, promptAsync] = Google.useAuthRequest(
         const googleIdToken = response.params?.id_token;
         if (!googleIdToken) return;
 
-        // 1) входимо у Firebase
         const credential = GoogleAuthProvider.credential(googleIdToken);
         const userCred = await signInWithCredential(auth, credential);
-
-        // 2) беремо Firebase ID token
         const firebaseIdToken = await userCred.user.getIdToken();
-
-        // 3) віддаємо на бекенд -> отримуємо твій JWT
         const r = await googleLogin(firebaseIdToken);
         if (r?.ok) navigation.replace("Main");
       }
