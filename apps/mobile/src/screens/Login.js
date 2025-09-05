@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import Constants from "expo-constants";
+import * as Crypto from "expo-crypto";
 
-import { Platform } from "react-native";
 import AuthInput from "../components/AuthInput";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
@@ -47,7 +47,10 @@ const IOS_CLIENT_ID =
 const ANDROID_CLIENT_ID =
   fb.androidClientId || process.env.EXPO_PUBLIC_FIREBASE_ANDROID_CLIENT_ID;
 
-  const nonce = Crypto.randomUUID?.() || `${Date.now()}.${Math.random().toString(36).slice(2)}`;
+ const nonce = useRef(
+  Crypto.randomUUID?.() ||
+    `${Date.now()}.${Math.random().toString(36).slice(2)}`
+).current;
 
 console.log("OAuth cfg:", {
   hasWebId: !!GOOGLE_WEB_CLIENT_ID,
@@ -60,15 +63,18 @@ if (!GOOGLE_WEB_CLIENT_ID) {
 }
 
 
-const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-  expoClientId: GOOGLE_WEB_CLIENT_ID,
-  iosClientId: IOS_CLIENT_ID,
-  androidClientId: ANDROID_CLIENT_ID,
-  webClientId: GOOGLE_WEB_CLIENT_ID,
-  scopes: ["openid", "email", "profile"],
-  extraParams: { prompt: "select_account", nonce } // +++
-});
-
+const [request, response, promptAsync] = Google.useIdTokenAuthRequest(googleConfig);
+const googleConfig = useMemo(
+  () => ({
+    expoClientId: GOOGLE_WEB_CLIENT_ID,
+    iosClientId: IOS_CLIENT_ID,
+    androidClientId: ANDROID_CLIENT_ID,
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    scopes: ["openid", "email", "profile"],
+    extraParams: { prompt: "select_account", nonce }
+  }),
+  [GOOGLE_WEB_CLIENT_ID, IOS_CLIENT_ID, ANDROID_CLIENT_ID, nonce]
+);
   useEffect(() => {
     (async () => {
       if (!response) return;
