@@ -2,11 +2,11 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
-import { makeRedirectUri } from "expo-auth-session";
+import { makeRedirectUri, useAuthRequest, ResponseType } from "expo-auth-session";
 import Constants from "expo-constants";
 import * as Crypto from "expo-crypto";
 
+import { Platform } from "react-native";
 import AuthInput from "../components/AuthInput";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
@@ -47,6 +47,12 @@ const IOS_CLIENT_ID =
 const ANDROID_CLIENT_ID =
   fb.androidClientId || process.env.EXPO_PUBLIC_FIREBASE_ANDROID_CLIENT_ID;
 
+  const discovery = {
+ authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+  tokenEndpoint: "https://oauth2.googleapis.com/token",
+  revocationEndpoint: "https://oauth2.googleapis.com/revoke"
+ };
+
  const nonce = useRef(
   Crypto.randomUUID?.() ||
     `${Date.now()}.${Math.random().toString(36).slice(2)}`
@@ -57,24 +63,28 @@ console.log("OAuth cfg:", {
   iosId: IOS_CLIENT_ID,
   webId: GOOGLE_WEB_CLIENT_ID
 });
+const CLIENT_ID = Platform.select({
+    ios: IOS_CLIENT_ID || GOOGLE_WEB_CLIENT_ID,
+    android: ANDROID_CLIENT_ID || GOOGLE_WEB_CLIENT_ID,
+    default: GOOGLE_WEB_CLIENT_ID
+ });
 
+  const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
 if (!GOOGLE_WEB_CLIENT_ID) {
   console.warn("❌ Немає GOOGLE_WEB_CLIENT_ID. Перевір .env або extra.firebase.googleWebClientId.");
 }
 
 
-const [request, response, promptAsync] = Google.useIdTokenAuthRequest(googleConfig);
-const googleConfig = useMemo(
-  () => ({
-    expoClientId: GOOGLE_WEB_CLIENT_ID,
-    iosClientId: IOS_CLIENT_ID,
-    androidClientId: ANDROID_CLIENT_ID,
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-    scopes: ["openid", "email", "profile"],
+const [request, response, promptAsync] = useAuthRequest(
+   {
+     clientId: CLIENT_ID,
+    responseType: ResponseType.IdToken,
+    redirectUri,
+     scopes: ["openid", "email", "profile"],
     extraParams: { prompt: "select_account", nonce }
-  }),
-  [GOOGLE_WEB_CLIENT_ID, IOS_CLIENT_ID, ANDROID_CLIENT_ID, nonce]
-);
+   },
+   discovery
+  );
   useEffect(() => {
     (async () => {
       if (!response) return;
