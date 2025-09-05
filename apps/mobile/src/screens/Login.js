@@ -37,14 +37,28 @@ export default function Login({ navigation, route }) {
   const generalMsg = typeof error === "object" ? error?.message : (error ? String(error) : null);
 
 
-const extra = (Constants?.expoConfig?.extra) ?? Constants?.manifestExtra ?? (Constants?.manifest?.extra) ?? {};
+const extraRoot =
+  (Constants?.expoConfig?.extra) ??
+  Constants?.manifestExtra ??
+  (Constants?.manifest?.extra) ??
+  {};
+const fb = extraRoot.firebase || {};
+
+const GOOGLE_WEB_CLIENT_ID =
+  fb.googleWebClientId || process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
+const IOS_CLIENT_ID =
+  fb.iosClientId || process.env.EXPO_PUBLIC_FIREBASE_IOS_CLIENT_ID;
+const ANDROID_CLIENT_ID =
+  fb.androidClientId || process.env.EXPO_PUBLIC_FIREBASE_ANDROID_CLIENT_ID;
+
 const redirectUri = makeRedirectUri({ useProxy: true, scheme: "bookloop" });
 
 const [request, response, promptAsync] = Google.useAuthRequest(
   {
-    expoClientId:   extra?.firebase?.googleWebClientId, 
-    iosClientId:    extra?.firebase?.iosClientId,       
-    webClientId:    extra?.firebase?.googleWebClientId,
+    expoClientId: GOOGLE_WEB_CLIENT_ID,   // для Expo proxy
+    iosClientId: IOS_CLIENT_ID,           // щоб iOS не скаржився
+    androidClientId: ANDROID_CLIENT_ID,   // опціонально
+    webClientId: GOOGLE_WEB_CLIENT_ID,
     responseType: "id_token",
     redirectUri,
     scopes: ["openid", "email", "profile"],
