@@ -37,10 +37,9 @@ export default function Login({ navigation, route }) {
   const generalMsg =
     typeof error === "object" ? error?.message : error ? String(error) : null;
 
-  // ---- OAuth config (стабільні значення, щоб не спричиняти рендери) ----
+  
   const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
 
-  // використовуємо Expo proxy у dev/testing
   const redirectUri = useMemo(
     () => "https://auth.expo.dev/@sikorskyii/bookloop",
     []
@@ -55,13 +54,11 @@ export default function Login({ navigation, route }) {
     []
   );
 
-  // сталий nonce
   const nonceRef = useRef(
     Crypto.randomUUID?.() ||
       `${Date.now()}.${Math.random().toString(36).slice(2)}`
   );
 
-  // одноразовий лог у dev, без спаму
   const loggedOnce = useRef(false);
   useEffect(() => {
     if (__DEV__ && !loggedOnce.current) {
