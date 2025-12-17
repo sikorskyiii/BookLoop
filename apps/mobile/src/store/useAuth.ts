@@ -23,22 +23,32 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   error: AuthError | null;
+  isGuest: boolean;
   init: () => Promise<void>;
   register: (payload: { firstName: string; lastName: string; email: string; password: string }) => Promise<{ ok: boolean; error?: AuthError }>;
   login: (credentials: { email: string; password: string }) => Promise<{ ok: boolean; error?: AuthError }>;
   googleLogin: (firebaseIdToken: string) => Promise<{ ok: boolean; error?: AuthError }>;
+  skipAuth: () => void;
   logout: () => Promise<void>;
 }
+
+const GUEST_MODE_KEY = "guest_mode_v1";
 
 export const useAuth = create<AuthState>((set, get) => ({
   token: null,
   user: null,
   loading: false,
   error: null,
+  isGuest: false,
 
   init: async () => {
     try {
       set({ loading: true, error: null });
+      const guestMode = await SecureStore.getItemAsync(GUEST_MODE_KEY);
+      if (guestMode === "true") {
+        set({ isGuest: true, loading: false });
+        return;
+      }
       const t = await SecureStore.getItemAsync(TOKEN_KEY);
       if (t) {
         setAuthToken(t);
@@ -95,10 +105,15 @@ export const useAuth = create<AuthState>((set, get) => ({
       return { ok: false, error: err };
     }
   },
+  skipAuth: () => {
+    SecureStore.setItemAsync(GUEST_MODE_KEY, "true");
+    set({ isGuest: true, token: null, user: null, error: null });
+  },
   logout: async () => {
     setAuthToken(null);
     await SecureStore.deleteItemAsync(TOKEN_KEY);
-    set({ token: null, user: null, error: null });
+    await SecureStore.deleteItemAsync(GUEST_MODE_KEY);
+    set({ token: null, user: null, error: null, isGuest: false });
   }
 }));
 

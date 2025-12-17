@@ -7,12 +7,14 @@ import BookCard from "../components/BookCard";
 import FAB from "../components/FAB";
 import { theme } from "../theme/theme";
 import { useBooks } from "../store/useBooks";
+import { useAuth } from "../store/useAuth";
 import { RootStackScreenProps } from "../types/navigation";
 
 const CATS = ["Усі", "Fiction", "Sci-Fi", "Non-Fiction", "Tech", "Other"];
 
 export default function Library({ navigation }: RootStackScreenProps<"Library">) {
   const { items, fetch, loading } = useBooks();
+  const { isGuest } = useAuth();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("Усі");
 
@@ -90,7 +92,7 @@ export default function Library({ navigation }: RootStackScreenProps<"Library">)
         }
       />
 
-      <FAB onPress={() => navigation.navigate("AddBook")} />
+      {!isGuest && <FAB onPress={() => navigation.navigate("AddBook")} />}
     </View>
   );
 }

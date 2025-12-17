@@ -19,9 +19,9 @@ function Row({ label, value }: RowProps) {
 }
 
 export default function Profile({ navigation }: RootStackScreenProps<"Profile">) {
-  const { user, logout } = useAuth();
+  const { user, logout, isGuest } = useAuth();
 
-  if (!user) {
+  if (!user && !isGuest) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
         <Header title="Профіль" />
@@ -43,6 +43,65 @@ export default function Profile({ navigation }: RootStackScreenProps<"Profile">)
         </View>
       </View>
     );
+  }
+
+  if (isGuest) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
+        <Header title="Профіль" />
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 16, padding: 24 }}>
+          <Text style={{ color: theme.colors.textMuted, textAlign: "center", fontSize: 16 }}>
+            Ви переглядаєте додаток як гість
+          </Text>
+          <Text style={{ color: theme.colors.textMuted, textAlign: "center", fontSize: 14 }}>
+            Для повного доступу до всіх функцій увійдіть або зареєструйтесь
+          </Text>
+          <View style={{ gap: 12, width: "100%", maxWidth: 300 }}>
+            <Pressable
+              onPress={() => navigation.navigate("Login")}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                borderRadius: 12,
+                backgroundColor: theme.colors.primary,
+                alignItems: "center"
+              }}
+            >
+              <Text style={{ color: "#0b0d12", fontWeight: "700" }}>Увійти</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate("Register")}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                borderRadius: 12,
+                backgroundColor: theme.colors.card,
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+                alignItems: "center"
+              }}
+            >
+              <Text style={{ color: theme.colors.text, fontWeight: "600" }}>Реєстрація</Text>
+            </Pressable>
+            <Pressable
+              onPress={logout}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                borderRadius: 12,
+                alignItems: "center"
+              }}
+            >
+              <Text style={{ color: theme.colors.textMuted, fontSize: 14 }}>Продовжити як гість</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (

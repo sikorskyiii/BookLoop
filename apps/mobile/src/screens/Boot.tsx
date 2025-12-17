@@ -5,19 +5,23 @@ import { theme } from "../theme/theme";
 import { RootStackScreenProps } from "../types/navigation";
 
 export default function Boot({ navigation }: RootStackScreenProps<"Boot">) {
-  const { init, token, loading } = useAuth();
+  const { init, token, loading, isGuest } = useAuth();
 
   useEffect(() => {
     let on = true;
     (async () => {
       await init();
       if (!on) return;
-      navigation.replace(token ? "Main" : "Entry");
+      if (token || isGuest) {
+        navigation.replace("Main");
+      } else {
+        navigation.replace("Entry");
+      }
     })();
     return () => {
       on = false;
     };
-  }, [token, navigation, init]);
+  }, [token, isGuest, navigation, init]);
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: theme.colors.bg }}>

@@ -1,15 +1,38 @@
 import { View, Text, Pressable, Dimensions, StatusBar, Image } from "react-native";
 import { RootStackScreenProps } from "../types/navigation";
+import { useAuth } from "../store/useAuth";
 
 const { width, height } = Dimensions.get("window");
 
 export default function Entry({ navigation }: RootStackScreenProps<"Entry">) {
+  const { skipAuth } = useAuth();
   const goLogin = () => navigation.navigate("Login");
   const goRegister = () => navigation.navigate("Register");
+  const handleSkip = () => {
+    skipAuth();
+    navigation.replace("Main");
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F6CBB0" }}>
       <StatusBar barStyle="dark-content" />
+      <Pressable
+        onPress={handleSkip}
+        style={{
+          position: "absolute",
+          top: StatusBar.currentHeight ? StatusBar.currentHeight + 8 : 48,
+          right: 16,
+          zIndex: 10,
+          paddingHorizontal: 16,
+          paddingVertical: 8,
+          borderRadius: 20,
+          backgroundColor: "rgba(255, 255, 255, 0.3)",
+          borderWidth: 1,
+          borderColor: "rgba(154, 107, 82, 0.5)"
+        }}
+      >
+        <Text style={{ color: "#7a5846", fontSize: 14, fontWeight: "600" }}>Skip</Text>
+      </Pressable>
       <View
         style={{
           position: "absolute",
