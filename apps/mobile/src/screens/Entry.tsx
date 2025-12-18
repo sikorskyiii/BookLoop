@@ -20,10 +20,10 @@ export default function Entry({ navigation }: RootStackScreenProps<"Entry">) {
         onPress={handleSkip}
         style={{
           position: "absolute",
-          top: StatusBar.currentHeight ? StatusBar.currentHeight + 8 : 48,
-          right: 16,
+          top: StatusBar.currentHeight ? StatusBar.currentHeight + 8 : 88,
+          right: 26,
           zIndex: 10,
-          paddingHorizontal: 16,
+          paddingHorizontal: 32,
           paddingVertical: 8,
           borderRadius: 20,
           backgroundColor: "rgba(255, 255, 255, 0.3)",
@@ -62,12 +62,8 @@ export default function Entry({ navigation }: RootStackScreenProps<"Entry">) {
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <View
           style={{
-            width: width * 0.58,
-            height: width * 0.58,
-            borderRadius: width * 0.29,
-            borderColor: "#9A6B52",
-            borderWidth: 8,
-            backgroundColor: "rgba(255,255,255,0.35)",
+            width: width * 0.68,
+            height: width * 0.68,
             overflow: "hidden",
             alignItems: "center",
             justifyContent: "center",
@@ -75,6 +71,8 @@ export default function Entry({ navigation }: RootStackScreenProps<"Entry">) {
             shadowOpacity: 0.2,
             shadowOffset: { width: 0, height: 12 },
             shadowRadius: 16,
+            marginTop: 80,
+            marginLeft:25,
             elevation: 10
           }}
         >
@@ -96,7 +94,7 @@ export default function Entry({ navigation }: RootStackScreenProps<"Entry">) {
             marginBottom: 22
           }}
         >
-          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>Вхід</Text>
+          <Text style={{ color: "#000", fontSize: 18, fontWeight: "700" }}>Вхід</Text>
         </Pressable>
         <Pressable
           onPress={goRegister}
@@ -110,7 +108,7 @@ export default function Entry({ navigation }: RootStackScreenProps<"Entry">) {
             marginBottom: 72
           }}
         >
-          <Text style={{ color: "#7a5846", fontSize: 18, fontWeight: "700" }}>Реєстрація</Text>
+          <Text style={{ color: "#000", fontSize: 18, fontWeight: "700" }}>Реєстрація</Text>
         </Pressable>
       </View>
     </View>
