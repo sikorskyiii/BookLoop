@@ -28,7 +28,7 @@ interface AuthState {
   register: (payload: { firstName: string; lastName: string; email: string; password: string }) => Promise<{ ok: boolean; error?: AuthError }>;
   login: (credentials: { email: string; password: string }) => Promise<{ ok: boolean; error?: AuthError }>;
   googleLogin: (firebaseIdToken: string) => Promise<{ ok: boolean; error?: AuthError }>;
-  skipAuth: () => void;
+  skipAuth: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -66,8 +66,11 @@ export const useAuth = create<AuthState>((set, get) => ({
   register: async ({ firstName, lastName, email, password }) => {
     set({ loading: true, error: null });
     try {
-      await registerApi({ firstName, lastName, email, password });
-      set({ loading: false, error: null });
+      const { token, user } = await registerApi({ firstName, lastName, email, password });
+      setAuthToken(token);
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      await SecureStore.deleteItemAsync(GUEST_MODE_KEY); // Clear guest mode if exists
+      set({ token, user, loading: false, error: null, isGuest: false });
       return { ok: true };
     } catch (e: any) {
       const err = e?.response?.data || { message: "Помилка реєстрації" };
@@ -82,7 +85,8 @@ export const useAuth = create<AuthState>((set, get) => ({
       const { token, user } = await loginApi({ email, password });
       setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
-      set({ token, user, loading: false, error: null });
+      await SecureStore.deleteItemAsync(GUEST_MODE_KEY); // Clear guest mode if exists
+      set({ token, user, loading: false, error: null, isGuest: false });
       return { ok: true };
     } catch (e: any) {
       const apiErr = e?.response?.data || {};
@@ -97,7 +101,8 @@ export const useAuth = create<AuthState>((set, get) => ({
       const { token, user } = await googleLoginApi({ idToken: firebaseIdToken });
       setAuthToken(token);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
-      set({ token, user, loading: false, error: null });
+      await SecureStore.deleteItemAsync(GUEST_MODE_KEY); // Clear guest mode if exists
+      set({ token, user, loading: false, error: null, isGuest: false });
       return { ok: true };
     } catch (e: any) {
       const err = e?.response?.data || { message: "Помилка входу через Google" };
@@ -105,8 +110,10 @@ export const useAuth = create<AuthState>((set, get) => ({
       return { ok: false, error: err };
     }
   },
-  skipAuth: () => {
-    SecureStore.setItemAsync(GUEST_MODE_KEY, "true");
+  skipAuth: async () => {
+    await SecureStore.setItemAsync(GUEST_MODE_KEY, "true");
+    await SecureStore.deleteItemAsync(TOKEN_KEY); // Clear token if exists
+    setAuthToken(null);
     set({ isGuest: true, token: null, user: null, error: null });
   },
   logout: async () => {

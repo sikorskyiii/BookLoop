@@ -8,8 +8,8 @@ export default function Entry({ navigation }: RootStackScreenProps<"Entry">) {
   const { skipAuth } = useAuth();
   const goLogin = () => navigation.navigate("Login");
   const goRegister = () => navigation.navigate("Register");
-  const handleSkip = () => {
-    skipAuth();
+  const handleSkip = async () => {
+    await skipAuth();
     navigation.replace("Main");
   };
 

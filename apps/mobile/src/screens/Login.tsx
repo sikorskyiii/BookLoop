@@ -7,6 +7,7 @@ import * as Crypto from "expo-crypto";
 
 import AuthInput from "../components/AuthInput";
 import DividerLabel from "../components/DividerLabel";
+import GoogleLogo from "../components/GoogleLogo";
 import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
 import { RootStackScreenProps } from "../types/navigation";
@@ -17,11 +18,13 @@ import { auth } from "../lib/firebase";
 WebBrowser.maybeCompleteAuthSession();
 
 const P = {
-  bg: theme.colors.bg,
-  title: "#B49783",
-  btnFill: theme.colors.primary,
-  btnFillText: "#2D2A28",
-  link: theme.colors.accentWarm
+  bg: "#FAF5F0",
+  title: "#95897D",
+  btnFill: "#867B71",
+  btnFillText: "#3D3838",
+  link: "#B8B0AA",
+  backIcon: "#919191",
+  googleBtn: "#2E2728"
 };
 
 export default function Login({ navigation, route }: RootStackScreenProps<"Login">) {
@@ -104,33 +107,33 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
     <View style={{ flex: 1, backgroundColor: P.bg }}>
       <Pressable
         onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Entry"))}
-        style={{ paddingTop: 74, paddingHorizontal: 14 }}
+        style={{ paddingTop: 64, paddingLeft: 20, paddingBottom: 8 }}
       >
-        <Ionicons name="chevron-back" size={26} color="#6F645B" />
+        <Ionicons name="chevron-back" size={24} color={P.backIcon} />
       </Pressable>
 
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 6 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 40 }}>
         <Text
           style={{
             textAlign: "center",
-            fontSize: 24,
-            fontWeight: "800",
+            fontSize: 26,
+            fontWeight: "600",
             color: P.title,
-            marginTop: 175,
-            marginBottom: 18
+            marginBottom: 32,
+            marginTop: 100
           }}
         >
           Вхід в акаунт
         </Text>
 
         {justRegistered && (
-          <Text style={{ color: theme.colors.textMuted, textAlign: "center", marginBottom: 8 }}>
+          <Text style={{ color: P.link, textAlign: "center", marginBottom: 8, fontSize: 14 }}>
             Акаунт створено. Увійдіть, будь ласка.
           </Text>
         )}
 
         {generalMsg && (
-          <Text style={{ color: theme.colors.danger, textAlign: "center", marginBottom: 8 }}>
+          <Text style={{ color: theme.colors.danger, textAlign: "center", marginBottom: 8, fontSize: 14 }}>
             {generalMsg}
           </Text>
         )}
@@ -141,61 +144,53 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
           onChangeText={setEmail}
           keyboardType="email-address"
         />
-        {!!fieldErr.email && <Text style={{ color: theme.colors.danger, marginTop: 6 }}>{fieldErr.email}</Text>}
+        {!!fieldErr.email && <Text style={{ color: theme.colors.danger, marginTop: 6, fontSize: 14 }}>{fieldErr.email}</Text>}
 
-        <View style={{ height: 12 }} />
+        <View style={{ height: 16 }} />
         <AuthInput placeholder="Пароль" value={pass} onChangeText={setPass} secure />
         {!!fieldErr.password && (
-          <Text style={{ color: theme.colors.danger, marginTop: 6 }}>{fieldErr.password}</Text>
+          <Text style={{ color: theme.colors.danger, marginTop: 6, fontSize: 14 }}>{fieldErr.password}</Text>
         )}
 
         <Pressable onPress={() => {}} style={{ alignSelf: "flex-end", marginTop: 8 }}>
-          <Text style={{ color: P.link, fontWeight: "600" }}>Забули пароль?</Text>
+          <Text style={{ color: P.link, fontSize: 14 }}>Забули пароль?</Text>
         </Pressable>
 
         <Pressable
           onPress={onSubmit}
           disabled={loading}
           style={{
-            marginTop: 18,
+            marginTop: 24,
             backgroundColor: P.btnFill,
             paddingVertical: 16,
-            borderRadius: 28,
+            borderRadius: 30,
             alignItems: "center",
             opacity: loading ? 0.6 : 1
           }}
         >
-          <Text style={{ color: P.btnFillText, fontSize: 16, fontWeight: "800" }}>
+          <Text style={{ color: P.btnFillText, fontSize: 16, fontWeight: "600" }}>
             {loading ? "Зачекайте…" : "Увійти"}
           </Text>
         </Pressable>
 
-        <Text style={{ textAlign: "center", color: theme.colors.textMuted, marginTop: 24 }}>
-          Немає акаунту?{" "}
-          <Text onPress={() => navigation.navigate("Register")} style={{ color: P.link, fontWeight: "600" }}>
-            Зареєструватись
-          </Text>
-        </Text>
+        <View style={{ marginTop: 28, marginBottom: 24 }}>
+          <DividerLabel label="Вхід через" color={P.link} line="#DDD6CB" />
+        </View>
 
-        <DividerLabel label="Вхід через" style={{ marginTop: 18 }} />
-
-        <View style={{ height: 18 }} />
         <Pressable
           disabled={!request || loading}
-          onPress={() => promptAsync({ useProxy: true, showInRecents: true })}
+          onPress={() => promptAsync({ showInRecents: true })}
           style={{
-            backgroundColor: "#2E2728",
-            borderRadius: 12,
-            height: 48,
+            backgroundColor: P.googleBtn,
+            paddingVertical: 16,
+            borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
+            height: 56,
             opacity: !request || loading ? 0.6 : 1
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Ionicons name="logo-google" size={20} color="#ffffff" />
-            <Text style={{ color: "#ffffff", fontWeight: "700" }}>Увійти з Google</Text>
-          </View>
+          <GoogleLogo size={24} />
         </Pressable>
       </ScrollView>
     </View>

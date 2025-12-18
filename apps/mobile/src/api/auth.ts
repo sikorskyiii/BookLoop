@@ -37,7 +37,7 @@ interface MeResponse {
   };
 }
 
-export async function registerApi(payload: RegisterPayload): Promise<{ user: AuthResponse["user"] }> {
+export async function registerApi(payload: RegisterPayload): Promise<AuthResponse> {
   const { data } = await api.post("/auth/register", payload);
   return data;
 }

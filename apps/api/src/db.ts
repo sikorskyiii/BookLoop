@@ -8,6 +8,9 @@ export async function query(q: string, params: unknown[] = []): Promise<pg.Query
   const client = await pool.connect();
   try {
     return await client.query(q, params);
+  } catch (error) {
+    console.error("Database query error:", error);
+    throw error;
   } finally {
     client.release();
   }

@@ -49,29 +49,46 @@ router.post(
   body("lastName").customSanitizer(trimStr).isLength({ min: 1 }).withMessage("Вкажіть прізвище"),
   body("email").customSanitizer(normalizeEmail).isEmail().withMessage("Невалідний email"),
   body("password").isLength({ min: 8 }).withMessage("Мінімум 8 символів у паролі"),
-  async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: "Некоректні дані", errors: formatErrors(errors) });
+  async (req: Request, res: Response, next: any) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Некоректні дані", errors: formatErrors(errors) });
+      }
+
+      const { firstName, lastName, email, password } = req.body;
+
+      const exists = await db("SELECT 1 FROM users WHERE email = $1", [email]);
+      if (exists.rowCount) {
+        return res.status(409).json({ message: "Email вже використовується", errors: { email: "Email вже використовується" } });
+      }
+
+      const hash = await bcrypt.hash(password, 10);
+      const { rows } = await db(
+        `INSERT INTO users (first_name, last_name, email, password_hash)
+         VALUES ($1,$2,$3,$4)
+         RETURNING *`,
+        [firstName, lastName, email, hash]
+      );
+
+      const user = rows[0] as User;
+      const token = sign(user.id);
+      return res.status(201).json({ token, user: pub(user) });
+    } catch (error: any) {
+      console.error("Register error:", error);
+      console.error("Error details:", {
+        code: error?.code,
+        message: error?.message,
+        stack: error?.stack
+      });
+      if (error?.code === "ECONNREFUSED" || error?.code === "ENOTFOUND" || error?.message?.includes("connect") || error?.message?.includes("Connection refused")) {
+        return res.status(500).json({ message: "База даних не доступна. Запустіть PostgreSQL або Docker контейнер." });
+      }
+      if (error?.code === "42P01" || error?.message?.includes("does not exist")) {
+        return res.status(500).json({ message: "Таблиця не існує. Перевірте міграції бази даних." });
+      }
+      return res.status(500).json({ message: error?.message || "Помилка сервера" });
     }
-
-    const { firstName, lastName, email, password } = req.body;
-
-    const exists = await db("SELECT 1 FROM users WHERE email = $1", [email]);
-    if (exists.rowCount) {
-      return res.status(409).json({ message: "Email вже використовується", errors: { email: "Email вже використовується" } });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-    const { rows } = await db(
-      `INSERT INTO users (first_name, last_name, email, password_hash)
-       VALUES ($1,$2,$3,$4)
-       RETURNING *`,
-      [firstName, lastName, email, hash]
-    );
-
-    const user = rows[0] as User;
-    return res.status(201).json({ user: pub(user) });
   }
 );
 
@@ -113,6 +130,10 @@ router.post("/google", async (req: Request, res: Response) => {
     const { idToken } = req.body; // Firebase ID token
     if (!idToken) return res.status(400).json({ message: "Missing idToken" });
 
+    if (!admin.apps.length) {
+      return res.status(500).json({ message: "Firebase Admin is not configured. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables." });
+    }
+
     const decoded = await admin.auth().verifyIdToken(idToken);
     const email = decoded.email;
     if (!email) return res.status(400).json({ message: "Email is required" });
@@ -129,18 +150,14 @@ router.post("/google", async (req: Request, res: Response) => {
         SET first_name = EXCLUDED.first_name,
             last_name  = EXCLUDED.last_name,
             firebase_uid = EXCLUDED.firebase_uid
-      RETURNING id, email, first_name, last_name;
+      RETURNING *;
     `;
     const { rows } = await db(upsertSql, [email, firstName, lastName, firebaseUid]);
-    const user = rows[0] as { id: string; email: string; first_name: string; last_name: string };
+    const user = rows[0] as User;
 
-    const token = jwt.sign(
-      { uid: user.id, email: user.email },
-      process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
-    );
+    const token = sign(user.id);
 
-    res.json({ token, user });
+    res.json({ token, user: pub(user) });
   } catch (e) {
     console.error("google auth error:", e);
     res.status(401).json({ message: "Invalid Firebase token" });

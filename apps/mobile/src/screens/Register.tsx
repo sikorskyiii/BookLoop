@@ -32,6 +32,9 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
 
   const { register, googleLogin, loading, error } = useAuth();
 
+  const fieldErr = (error && error.errors) || {};
+  const generalMsg = typeof error === "object" ? error?.message : error ? String(error) : null;
+
   const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
   const redirectUri = useMemo(() => "https://auth.expo.dev/@sikorskyii/bookloop", []);
   const discovery = useMemo(
@@ -118,8 +121,10 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
         </Text>
 
         <AuthInput placeholder="Повне імʼя" value={first} onChangeText={setFirst} autoCapitalize="words" />
+        {!!fieldErr.firstName && <Text style={{ color: theme.colors.danger, marginTop: 6, fontSize: 14 }}>{fieldErr.firstName}</Text>}
         <View style={{ height: 16 }} />
         <AuthInput placeholder="Прізвище" value={last} onChangeText={setLast} autoCapitalize="words" />
+        {!!fieldErr.lastName && <Text style={{ color: theme.colors.danger, marginTop: 6, fontSize: 14 }}>{fieldErr.lastName}</Text>}
         <View style={{ height: 16 }} />
         <AuthInput
           placeholder="Електронна пошта"
@@ -127,10 +132,12 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
           onChangeText={setEmail}
           keyboardType="email-address"
         />
+        {!!fieldErr.email && <Text style={{ color: theme.colors.danger, marginTop: 6, fontSize: 14 }}>{fieldErr.email}</Text>}
         <View style={{ height: 16 }} />
         <AuthInput placeholder="Пароль" value={pass} onChangeText={setPass} secure />
+        {!!fieldErr.password && <Text style={{ color: theme.colors.danger, marginTop: 6, fontSize: 14 }}>{fieldErr.password}</Text>}
 
-        {!!error && <Text style={{ color: theme.colors.danger, marginTop: 12, fontSize: 14 }}>{String(error)}</Text>}
+        {generalMsg && <Text style={{ color: theme.colors.danger, marginTop: 12, fontSize: 14 }}>{generalMsg}</Text>}
 
         <Pressable
           onPress={onSubmit}
