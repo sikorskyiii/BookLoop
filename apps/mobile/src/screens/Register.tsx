@@ -44,8 +44,7 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
       responseType: ResponseType.IdToken,
       redirectUri,
       scopes: ["openid", "email", "profile"],
-      extraParams: { prompt: "select_account" },
-      usePKCE: true
+      extraParams: { prompt: "select_account" }
     },
     {
       authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
