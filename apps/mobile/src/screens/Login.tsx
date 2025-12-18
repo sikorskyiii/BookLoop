@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import { useAuthRequest, ResponseType } from "expo-auth-session";
-import * as Crypto from "expo-crypto";
+import { useAuthRequest, ResponseType, makeRedirectUri } from "expo-auth-session";
 
 import AuthInput from "../components/AuthInput";
 import DividerLabel from "../components/DividerLabel";
@@ -41,29 +40,7 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
 
   const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
 
-  const redirectUri = useMemo(() => "https://auth.expo.dev/@sikorskyii/bookloop", []);
-
-  const discovery = useMemo(
-    () => ({
-      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-      tokenEndpoint: "https://oauth2.googleapis.com/token",
-      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
-    }),
-    []
-  );
-
-  const nonceRef = useRef(
-    Crypto.randomUUID?.() || `${Date.now()}.${Math.random().toString(36).slice(2)}`
-  );
-
-  const loggedOnce = useRef(false);
-  useEffect(() => {
-    if (__DEV__ && !loggedOnce.current) {
-      console.log("Auth cfg (webId present):", !!WEB_CLIENT_ID);
-      console.log("redirectUri used:", redirectUri);
-      loggedOnce.current = true;
-    }
-  }, [WEB_CLIENT_ID, redirectUri]);
+  const redirectUri = useMemo(() => makeRedirectUri({ scheme: "bookloop" }), []);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -71,10 +48,14 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
       responseType: ResponseType.IdToken,
       redirectUri,
       scopes: ["openid", "email", "profile"],
-      extraParams: { prompt: "select_account", nonce: nonceRef.current },
-      usePKCE: false
+      extraParams: { prompt: "select_account" },
+      usePKCE: true
     },
-    discovery
+    {
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+      tokenEndpoint: "https://oauth2.googleapis.com/token",
+      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
+    }
   );
 
   useEffect(() => {
@@ -173,13 +154,22 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
           </Text>
         </Pressable>
 
+        <Pressable
+          onPress={() => navigation.navigate("Register")}
+          style={{ marginTop: 20, alignItems: "center" }}
+        >
+          <Text style={{ color: P.link, fontSize: 14 }}>
+            Ще не маєте акаунту? <Text style={{ fontWeight: "600" }}>Зареєструватись</Text>
+          </Text>
+        </Pressable>
+
         <View style={{ marginTop: 28, marginBottom: 24 }}>
           <DividerLabel label="Вхід через" color={P.link} line="#DDD6CB" />
         </View>
 
         <Pressable
           disabled={!request || loading}
-          onPress={() => promptAsync({ showInRecents: true })}
+          onPress={() => promptAsync()}
           style={{
             backgroundColor: P.googleBtn,
             paddingVertical: 16,

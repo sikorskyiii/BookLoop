@@ -1,98 +1,87 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, FlatList, ScrollView } from "react-native";
-import Header from "../components/Header";
+import { View, Text, FlatList, Pressable, StatusBar } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import SearchBar from "../components/SearchBar";
-import Chip from "../components/Chip";
 import BookCard from "../components/BookCard";
-import FAB from "../components/FAB";
 import { theme } from "../theme/theme";
 import { useBooks } from "../store/useBooks";
 import { useAuth } from "../store/useAuth";
 import { RootStackScreenProps } from "../types/navigation";
 
-const CATS = ["Усі", "Fiction", "Sci-Fi", "Non-Fiction", "Tech", "Other"];
-
 export default function Library({ navigation }: RootStackScreenProps<"Library">) {
   const { items, fetch, loading } = useBooks();
   const { isGuest } = useAuth();
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState("Усі");
 
   useEffect(() => {
     fetch();
   }, [fetch]);
 
   const filtered = useMemo(() => {
-    const base = cat === "Усі" ? items : items.filter((x) => (x.category || "Other") === cat);
-    if (!q) return base;
-    return base.filter(
+    if (!q) return items;
+    return items.filter(
       (x) =>
         (x.title || "").toLowerCase().includes(q.toLowerCase()) ||
         (x.author || "").toLowerCase().includes(q.toLowerCase())
     );
-  }, [items, q, cat]);
+  }, [items, q]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.bg }}>
-      <Header />
-      <SearchBar value={q} onChangeText={setQ} />
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ paddingHorizontal: 16, paddingTop: 12 }}
+      <StatusBar barStyle="dark-content" />
+      {/* Header with menu, search, and add button */}
+      <View
+        style={{
+          paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 8 : 52,
+          paddingBottom: 12,
+          paddingHorizontal: 16,
+          backgroundColor: theme.colors.bg
+        }}
       >
-        {CATS.map((label) => (
-          <Chip key={label} label={label} active={label === cat} onPress={() => setCat(label)} />
-        ))}
-      </ScrollView>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ paddingHorizontal: 16, paddingTop: 12 }}
-      >
-        {filtered.slice(0, 5).map((item) => (
-          <View
-            key={item.id || item.title}
-            style={{
-              width: 220,
-              height: 140,
-              marginRight: 12,
-              borderRadius: 16,
-              overflow: "hidden",
-              borderWidth: 1,
-              borderColor: theme.colors.border,
-              backgroundColor: theme.colors.card
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+          <Pressable
+            onPress={() => {
+              // TODO: Open menu drawer
             }}
+            style={{ marginRight: 12 }}
           >
-            <Text
-              style={{ color: theme.colors.text, fontWeight: "700", fontSize: 14, padding: 12 }}
-              numberOfLines={2}
-            >
-              {item.title}
-            </Text>
+            <Ionicons name="menu" size={24} color={theme.colors.text} />
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <SearchBar value={q} onChangeText={setQ} />
           </View>
-        ))}
-      </ScrollView>
+          {!isGuest && (
+            <Pressable
+              onPress={() => navigation.navigate("AddBook")}
+              style={{ marginLeft: 12 }}
+            >
+              <Ionicons name="document-text-outline" size={24} color={theme.colors.text} />
+            </Pressable>
+          )}
+        </View>
+      </View>
 
+      {/* Book List */}
       <FlatList
         data={filtered}
         keyExtractor={(it, i) => String(it.id ?? i)}
-        contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
         refreshing={loading}
         onRefresh={fetch}
         renderItem={({ item }) => (
           <BookCard item={item} onPress={() => navigation.navigate("BookDetails", { id: item.id })} />
         )}
         ListEmptyComponent={
-          <Text style={{ color: theme.colors.textMuted, textAlign: "center", marginTop: 32 }}>
-            Порожньо
-          </Text>
+          <View style={{ alignItems: "center", marginTop: 64 }}>
+            <Text style={{ color: theme.colors.textMuted, textAlign: "center", fontSize: 16 }}>
+              Порожньо
+            </Text>
+            <Text style={{ color: theme.colors.textMuted, textAlign: "center", fontSize: 14, marginTop: 8 }}>
+              Додайте книги, щоб почати
+            </Text>
+          </View>
         }
       />
-
-      {!isGuest && <FAB onPress={() => navigation.navigate("AddBook")} />}
     </View>
   );
 }

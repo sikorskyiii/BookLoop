@@ -17,7 +17,8 @@ export type RootStackScreenProps<T extends keyof RootStackParamList> = NativeSta
 
 export type TabParamList = {
   Home: undefined;
-  Search: undefined;
+  Recs: undefined;
+  Chat: undefined;
   Profile: undefined;
 };
 

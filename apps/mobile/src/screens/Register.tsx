@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import { useAuthRequest, ResponseType } from "expo-auth-session";
-import * as Crypto from "expo-crypto";
+import { useAuthRequest, ResponseType, makeRedirectUri } from "expo-auth-session";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import AuthInput from "../components/AuthInput";
 import DividerLabel from "../components/DividerLabel";
@@ -36,18 +35,8 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
   const generalMsg = typeof error === "object" ? error?.message : error ? String(error) : null;
 
   const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
-  const redirectUri = useMemo(() => "https://auth.expo.dev/@sikorskyii/bookloop", []);
-  const discovery = useMemo(
-    () => ({
-      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-      tokenEndpoint: "https://oauth2.googleapis.com/token",
-      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
-    }),
-    []
-  );
-  const nonceRef = useRef(
-    Crypto.randomUUID?.() || `${Date.now()}.${Math.random().toString(36).slice(2)}`
-  );
+
+  const redirectUri = useMemo(() => makeRedirectUri({ scheme: "bookloop" }), []);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -55,10 +44,14 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
       responseType: ResponseType.IdToken,
       redirectUri,
       scopes: ["openid", "email", "profile"],
-      extraParams: { prompt: "select_account", nonce: nonceRef.current },
-      usePKCE: false
+      extraParams: { prompt: "select_account" },
+      usePKCE: true
     },
-    discovery
+    {
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+      tokenEndpoint: "https://oauth2.googleapis.com/token",
+      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
+    }
   );
 
   useEffect(() => {

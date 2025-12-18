@@ -2,6 +2,7 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import { View, Text } from "react-native";
 
 import Boot from "./src/screens/Boot";
 import Entry from "./src/screens/Entry";
@@ -41,6 +42,22 @@ function LibraryStack() {
   );
 }
 
+function RecsScreen() {
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.bg, alignItems: "center", justifyContent: "center" }}>
+      <Text style={{ color: theme.colors.textMuted }}>Recs</Text>
+    </View>
+  );
+}
+
+function ChatScreen() {
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.bg, alignItems: "center", justifyContent: "center" }}>
+      <Text style={{ color: theme.colors.textMuted }}>Chat</Text>
+    </View>
+  );
+}
+
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -52,16 +69,26 @@ function MainTabs() {
         tabBarIcon: ({ color, size }) => {
           const map: Record<string, keyof typeof Ionicons.glyphMap> = {
             Home: "home-outline",
-            Search: "search-outline",
+            Recs: "grid-outline",
+            Chat: "chatbubble-outline",
             Profile: "person-outline"
           };
           return <Ionicons name={map[route.name]} size={size} color={color} />;
         }
       })}
     >
-      <Tab.Screen name="Home" component={LibraryStack} options={{ title: "Головна" }} />
-      <Tab.Screen name="Search" component={Search} options={{ title: "Пошук" }} />
-      <Tab.Screen name="Profile" component={Profile} options={{ title: "Профіль" }} />
+      <Tab.Screen name="Home" component={LibraryStack} options={{ title: "Home" }} />
+      <Tab.Screen name="Recs" component={RecsScreen} options={{ title: "Recs" }} />
+      <Tab.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{
+          title: "Chat",
+          tabBarBadge: 2,
+          tabBarBadgeStyle: { backgroundColor: theme.colors.danger }
+        }}
+      />
+      <Tab.Screen name="Profile" component={Profile} options={{ title: "Profile" }} />
     </Tab.Navigator>
   );
 }

@@ -9,6 +9,8 @@ interface Book {
   description?: string | null;
   cover?: string | null;
   category?: string | null;
+  location?: string | null;
+  price?: number | null;
   created_at: string;
 }
 

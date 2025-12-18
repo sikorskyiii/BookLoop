@@ -12,12 +12,10 @@ export default function SearchBar({ value, onChangeText, placeholder = "Пошу
   return (
     <View
       style={{
-        marginHorizontal: 16,
-        marginTop: 12,
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: theme.colors.card,
-        borderRadius: theme.radius.lg,
+        borderRadius: 12,
         paddingHorizontal: 12,
         borderWidth: 1,
         borderColor: theme.colors.border
@@ -29,7 +27,7 @@ export default function SearchBar({ value, onChangeText, placeholder = "Пошу
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={theme.colors.textMuted}
-        style={{ flex: 1, color: theme.colors.text, paddingVertical: 12, marginLeft: 8 }}
+        style={{ flex: 1, color: theme.colors.text, paddingVertical: 10, marginLeft: 8 }}
       />
     </View>
   );
