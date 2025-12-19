@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { View, Text, Pressable, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as WebBrowser from "expo-web-browser";
-import { useAuthRequest, ResponseType } from "expo-auth-session";
+import * as AuthSession from "expo-auth-session";
+import Constants from "expo-constants";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import AuthInput from "../components/AuthInput";
 import DividerLabel from "../components/DividerLabel";
@@ -11,8 +11,6 @@ import { theme } from "../theme/theme";
 import { useAuth } from "../store/useAuth";
 import { RootStackScreenProps } from "../types/navigation";
 import { auth } from "../lib/firebase";
-
-WebBrowser.maybeCompleteAuthSession();
 
 const P = {
   bg: "#FAF5F0",
@@ -34,47 +32,132 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
   const fieldErr = (error && error.errors) || {};
   const generalMsg = typeof error === "object" ? error?.message : error ? String(error) : null;
 
-  const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
-  const redirectUri = useMemo(() => "https://auth.expo.dev/@sikorskyii/bookloop", []);
-  const discovery = useMemo(
-    () => ({
+  // Get the appropriate client ID based on platform
+  const { clientId, redirectUri } = useMemo(() => {
+    const extra = Constants?.expoConfig?.extra ?? Constants?.manifestExtra ?? Constants?.manifest?.extra ?? {};
+    const firebaseConfig = extra?.firebase || {};
+    const iosClientId = firebaseConfig.iosClientId;
+    
+    if (!iosClientId) {
+      console.warn("iOS Client ID не налаштовано");
+    }
+    
+    const cId = iosClientId || "";
+    
+    // For iOS Client ID, use reverse client ID format for redirect URI
+    // Format: com.googleusercontent.apps.{FULL_CLIENT_ID_WITHOUT_SUFFIX}:/oauth2redirect
+    // Extract the full client ID without the .apps.googleusercontent.com suffix
+    const clientIdWithoutSuffix = iosClientId?.replace(".apps.googleusercontent.com", "") || "";
+    const rUri = `com.googleusercontent.apps.${clientIdWithoutSuffix}:/oauth2redirect`;
+    
+    return { clientId: cId, redirectUri: rUri };
+  }, []);
+
+  const handleAuthSuccess = useCallback(async (idToken: string) => {
+    try {
+      console.log("Received idToken, signing in with Firebase...");
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCred = await signInWithCredential(auth, credential);
+      console.log("Firebase sign-in successful, getting ID token...");
+      const firebaseIdToken = await userCred.user.getIdToken();
+      console.log("Calling googleLogin API...");
+      const r = await googleLogin(firebaseIdToken);
+      if (r?.ok) {
+        console.log("Google login successful!");
+        navigation.replace("Main");
+      } else {
+        console.log("Google login failed:", r?.error);
+      }
+    } catch (error: any) {
+      console.log("Error signing in with credential:", error);
+      console.log("Error details:", JSON.stringify(error, null, 2));
+      Alert.alert("Помилка", `Помилка обробки відповіді від Google: ${error?.message || "Невідома помилка"}`);
+    }
+  }, [googleLogin, navigation]);
+
+  // Use authorization code flow with PKCE for iOS Client ID
+  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+    {
+      clientId,
+      scopes: ["openid", "profile", "email"],
+      responseType: AuthSession.ResponseType.Code, // Use code flow instead of id_token
+      redirectUri,
+      usePKCE: true, // PKCE is required for authorization code flow
+    },
+    {
       authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
       tokenEndpoint: "https://oauth2.googleapis.com/token",
-      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
-    }),
-    []
-  );
-  const [request, response, promptAsync] = useAuthRequest(
-    {
-      clientId: WEB_CLIENT_ID,
-      responseType: ResponseType.IdToken,
-      redirectUri,
-      scopes: ["openid", "email", "profile"],
-      extraParams: { prompt: "select_account" }
-    },
-    discovery
+    }
   );
 
   useEffect(() => {
-    (async () => {
-      if (!response) return;
-      if (response.type === "success") {
-        try {
-          const googleIdToken = response.params?.id_token;
-          if (!googleIdToken) return;
-          const credential = GoogleAuthProvider.credential(googleIdToken);
-          const userCred = await signInWithCredential(auth, credential);
-          const firebaseIdToken = await userCred.user.getIdToken();
-          const r = await googleLogin(firebaseIdToken);
-          if (r?.ok) navigation.replace("Main");
-        } catch (e) {
-          console.log("Google sign-in failed:", e);
+    if (response?.type === "success" && request && request.codeVerifier) {
+      // Exchange authorization code for id_token with PKCE code_verifier
+      // redirectUri must exactly match the one used in authorization request
+      // code_verifier is automatically handled by expo-auth-session from request
+      console.log("Exchanging code for token...");
+      console.log("Code:", response.params.code?.substring(0, 20) + "...");
+      console.log("Redirect URI:", redirectUri);
+      console.log("Code verifier present:", !!request.codeVerifier);
+      
+      AuthSession.exchangeCodeAsync(
+        {
+          clientId,
+          code: response.params.code,
+          redirectUri: request.redirectUri || redirectUri, // Use redirectUri from request to ensure exact match
+          extraParams: {
+            code_verifier: request.codeVerifier, // PKCE code_verifier
+          },
+        },
+        {
+          tokenEndpoint: "https://oauth2.googleapis.com/token",
         }
-      } else if (response.type === "error") {
-        console.log("OAuth error:", response.params || response);
-      }
-    })();
-  }, [response, navigation, googleLogin]);
+      )
+        .then((tokenResponse) => {
+          if (tokenResponse.idToken) {
+            handleAuthSuccess(tokenResponse.idToken);
+          } else {
+            console.log("Token response:", tokenResponse);
+            Alert.alert("Помилка", "Не вдалося отримати токен від Google");
+          }
+        })
+        .catch((error) => {
+          console.log("Error exchanging code:", error);
+          console.log("Error details:", JSON.stringify(error, null, 2));
+          Alert.alert("Помилка", `Помилка обміну коду на токен: ${error?.message || "Невідома помилка"}`);
+        });
+    } else if (response?.type === "error") {
+      console.log("OAuth error:", response.error);
+      Alert.alert("Помилка", "Не вдалося увійти через Google");
+    } else if (response?.type === "success" && !request?.codeVerifier) {
+      console.log("Missing code verifier in request");
+      Alert.alert("Помилка", "OAuth запит не містить code verifier");
+    }
+  }, [response, request, handleAuthSuccess]);
+
+  async function handleGoogleSignIn() {
+    if (!clientId) {
+      Alert.alert("Помилка", "Google Client ID не налаштовано");
+      return;
+    }
+
+    if (!request) {
+      Alert.alert("Помилка", "OAuth запит не готовий");
+      return;
+    }
+
+    // Prevent multiple simultaneous auth sessions
+    if (loading) {
+      return;
+    }
+
+    try {
+      await promptAsync();
+    } catch (error: any) {
+      console.log("Google sign-in failed:", error);
+      Alert.alert("Помилка", error?.message || "Не вдалося увійти через Google");
+    }
+  }
 
   async function onSubmit() {
     const res = await register({
@@ -155,8 +238,8 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
         </View>
 
         <Pressable
-          onPress={() => promptAsync()}
-          disabled={!request}
+          onPress={handleGoogleSignIn}
+          disabled={loading}
           style={{
             backgroundColor: P.googleBtn,
             paddingVertical: 16,
@@ -164,7 +247,7 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
             alignItems: "center",
             justifyContent: "center",
             height: 56,
-            opacity: !request ? 0.6 : 1
+            opacity: loading ? 0.6 : 1
           }}
         >
           <GoogleLogo size={24} />

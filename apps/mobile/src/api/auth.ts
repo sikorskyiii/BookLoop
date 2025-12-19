@@ -53,7 +53,15 @@ export async function meApi(): Promise<MeResponse> {
 }
 
 export async function googleLoginApi({ idToken }: GoogleLoginPayload): Promise<AuthResponse> {
-  const { data } = await api.post("/auth/google", { idToken, provider: "firebase" });
-  return data;
+  try {
+    console.log("Sending Google login request to API...");
+    const { data } = await api.post("/auth/google", { idToken });
+    console.log("Google login API response:", data);
+    return data;
+  } catch (error: any) {
+    console.log("Google login API error:", error);
+    console.log("Error response:", error?.response?.data);
+    throw error;
+  }
 }
 

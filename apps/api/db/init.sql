@@ -8,9 +8,13 @@ CREATE TABLE IF NOT EXISTS users (
   first_name TEXT NOT NULL,
   last_name  TEXT NOT NULL,
   email      CITEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT, -- Nullable for Google OAuth users
+  firebase_uid TEXT, -- For Google OAuth users
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Add unique constraint on firebase_uid
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_firebase_uid ON users(firebase_uid) WHERE firebase_uid IS NOT NULL;
 
 -- books
 CREATE TABLE IF NOT EXISTS books (
