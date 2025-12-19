@@ -1,8 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import { useAuthRequest, ResponseType, makeRedirectUri } from "expo-auth-session";
+import { useAuthRequest, ResponseType } from "expo-auth-session";
 
 import AuthInput from "../components/AuthInput";
 import DividerLabel from "../components/DividerLabel";
@@ -11,7 +11,7 @@ import { useAuth } from "../store/useAuth";
 import { theme } from "../theme/theme";
 import { RootStackScreenProps } from "../types/navigation";
 
-import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+import { GoogleAuthProvider, signInWithCredential }  from "firebase/auth";
 import { auth } from "../lib/firebase";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -40,7 +40,25 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
 
   const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
 
-  const redirectUri = useMemo(() => makeRedirectUri({ scheme: "bookloop" }), []);
+  const redirectUri = useMemo(() => "https://auth.expo.dev/@sikorskyii/bookloop", []);
+
+  const discovery = useMemo(
+    () => ({
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+      tokenEndpoint: "https://oauth2.googleapis.com/token",
+      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
+    }),
+    []
+  );
+
+  const loggedOnce = useRef(false);
+  useEffect(() => {
+    if (__DEV__ && !loggedOnce.current) {
+      console.log("Auth cfg (webId present):", !!WEB_CLIENT_ID);
+      console.log("redirectUri used:", redirectUri);
+      loggedOnce.current = true;
+    }
+  }, [WEB_CLIENT_ID, redirectUri]);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -50,11 +68,7 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
       scopes: ["openid", "email", "profile"],
       extraParams: { prompt: "select_account" }
     },
-    {
-      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-      tokenEndpoint: "https://oauth2.googleapis.com/token",
-      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
-    }
+    discovery
   );
 
   useEffect(() => {

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
-import { useAuthRequest, ResponseType, makeRedirectUri } from "expo-auth-session";
+import { useAuthRequest, ResponseType } from "expo-auth-session";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import AuthInput from "../components/AuthInput";
 import DividerLabel from "../components/DividerLabel";
@@ -35,9 +35,15 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
   const generalMsg = typeof error === "object" ? error?.message : error ? String(error) : null;
 
   const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID;
-
-  const redirectUri = useMemo(() => makeRedirectUri({ scheme: "bookloop" }), []);
-
+  const redirectUri = useMemo(() => "https://auth.expo.dev/@sikorskyii/bookloop", []);
+  const discovery = useMemo(
+    () => ({
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+      tokenEndpoint: "https://oauth2.googleapis.com/token",
+      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
+    }),
+    []
+  );
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: WEB_CLIENT_ID,
@@ -46,11 +52,7 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
       scopes: ["openid", "email", "profile"],
       extraParams: { prompt: "select_account" }
     },
-    {
-      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-      tokenEndpoint: "https://oauth2.googleapis.com/token",
-      revocationEndpoint: "https://oauth2.googleapis.com/revoke"
-    }
+    discovery
   );
 
   useEffect(() => {
