@@ -39,5 +39,5 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 app.use((_req: Request, res: Response) => res.status(404).json({ message: "Not found" }));
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`API on http://localhost:${port}`));
+app.listen(port, '0.0.0.0', () => console.log(`API on http://0.0.0.0:${port}`));
 

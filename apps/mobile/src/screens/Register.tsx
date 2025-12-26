@@ -43,10 +43,7 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
     }
     
     const cId = iosClientId || "";
-    
-    // For iOS Client ID, use reverse client ID format for redirect URI
-    // Format: com.googleusercontent.apps.{FULL_CLIENT_ID_WITHOUT_SUFFIX}:/oauth2redirect
-    // Extract the full client ID without the .apps.googleusercontent.com suffix
+
     const clientIdWithoutSuffix = iosClientId?.replace(".apps.googleusercontent.com", "") || "";
     const rUri = `com.googleusercontent.apps.${clientIdWithoutSuffix}:/oauth2redirect`;
     
@@ -100,11 +97,23 @@ export default function Register({ navigation }: RootStackScreenProps<"Register"
       console.log("Redirect URI:", redirectUri);
       console.log("Code verifier present:", !!request.codeVerifier);
       
+      // Use the exact redirectUri from the request to ensure it matches
+      const exactRedirectUri = request.redirectUri || redirectUri;
+      console.log("Request redirectUri:", request.redirectUri);
+      console.log("Computed redirectUri:", redirectUri);
+      console.log("Using redirect URI for exchange:", exactRedirectUri);
+      console.log("Code verifier length:", request.codeVerifier?.length || 0);
+      
+      if (!request.codeVerifier) {
+        Alert.alert("Помилка", "Code verifier відсутній");
+        return;
+      }
+      
       AuthSession.exchangeCodeAsync(
         {
           clientId,
           code: response.params.code,
-          redirectUri: request.redirectUri || redirectUri, // Use redirectUri from request to ensure exact match
+          redirectUri: exactRedirectUri,
           extraParams: {
             code_verifier: request.codeVerifier, // PKCE code_verifier
           },

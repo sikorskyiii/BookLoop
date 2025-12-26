@@ -5,14 +5,20 @@ import { Platform } from "react-native";
 // For physical device, also use your Mac's IP address
 // You can find your IP with: ifconfig | grep "inet " | grep -v 127.0.0.1
 const baseURL = Platform.select({
-  ios: "http://192.168.1.102:3000", // Use your Mac's IP address for iOS simulator
+  ios: "http://192.168.0.111:3000", // Use your Mac's IP address for iOS simulator
   android: "http://10.0.2.2:3000", // Android emulator
   default: "http://localhost:3000"
 });
 
 console.log("API Base URL:", baseURL);
 
-export const api: AxiosInstance = axios.create({ baseURL });
+export const api: AxiosInstance = axios.create({ 
+  baseURL,
+  timeout: 30000, // 30 seconds timeout
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
 
 let authToken: string | null = null;
 export function setAuthToken(t: string | null): void {

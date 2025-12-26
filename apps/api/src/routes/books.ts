@@ -58,25 +58,6 @@ router.get(
   }
 );
 
-router.get(
-  "/user/:userId",
-  param("userId").isUUID(),
-  async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ message: "Invalid userId", errors: errors.array() });
-
-    const { userId } = req.params;
-    const { rows } = await query(
-      `SELECT id, user_id, title, author, description, cover, category, created_at
-       FROM books
-       WHERE user_id = $1
-       ORDER BY created_at DESC`,
-      [userId]
-    );
-    res.json({ items: rows as Book[] });
-  }
-);
-
 router.post(
   "/",
   requireAuth,

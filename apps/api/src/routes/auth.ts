@@ -51,27 +51,27 @@ router.post(
   body("password").isLength({ min: 8 }).withMessage("Мінімум 8 символів у паролі"),
   async (req: Request, res: Response, next: any) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ message: "Некоректні дані", errors: formatErrors(errors) });
-      }
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: "Некоректні дані", errors: formatErrors(errors) });
+    }
 
-      const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
-      const exists = await db("SELECT 1 FROM users WHERE email = $1", [email]);
-      if (exists.rowCount) {
-        return res.status(409).json({ message: "Email вже використовується", errors: { email: "Email вже використовується" } });
-      }
+    const exists = await db("SELECT 1 FROM users WHERE email = $1", [email]);
+    if (exists.rowCount) {
+      return res.status(409).json({ message: "Email вже використовується", errors: { email: "Email вже використовується" } });
+    }
 
-      const hash = await bcrypt.hash(password, 10);
-      const { rows } = await db(
-        `INSERT INTO users (first_name, last_name, email, password_hash)
-         VALUES ($1,$2,$3,$4)
-         RETURNING *`,
-        [firstName, lastName, email, hash]
-      );
+    const hash = await bcrypt.hash(password, 10);
+    const { rows } = await db(
+      `INSERT INTO users (first_name, last_name, email, password_hash)
+       VALUES ($1,$2,$3,$4)
+       RETURNING *`,
+      [firstName, lastName, email, hash]
+    );
 
-      const user = rows[0] as User;
+    const user = rows[0] as User;
       const token = sign(user.id);
       return res.status(201).json({ token, user: pub(user) });
     } catch (error: any) {

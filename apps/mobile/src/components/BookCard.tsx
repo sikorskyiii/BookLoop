@@ -59,10 +59,10 @@ export default function BookCard({ item, onPress, style }: BookCardProps) {
         <View style={{ flex: 1, marginLeft: 12, justifyContent: "space-between" }}>
           <View>
             <Text numberOfLines={2} style={{ color: theme.colors.text, fontWeight: "700", fontSize: 15, marginBottom: 4 }}>
-              {item.title}
-            </Text>
+            {item.title}
+          </Text>
             <Text numberOfLines={1} style={{ color: theme.colors.textMuted, fontSize: 13, marginBottom: 8 }}>
-              {item.author}
+            {item.author}
             </Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
               <View

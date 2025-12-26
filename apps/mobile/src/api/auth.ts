@@ -55,13 +55,43 @@ export async function meApi(): Promise<MeResponse> {
 export async function googleLoginApi({ idToken }: GoogleLoginPayload): Promise<AuthResponse> {
   try {
     console.log("Sending Google login request to API...");
-    const { data } = await api.post("/auth/google", { idToken });
-    console.log("Google login API response:", data);
+    console.log("API endpoint:", api.defaults.baseURL + "/auth/google");
+    console.log("idToken length:", idToken?.length || 0);
+    const { data } = await api.post("/auth/google", { idToken }, {
+      timeout: 60000, // 60 seconds timeout
+    });
+    console.log("Google login API response received");
     return data;
   } catch (error: any) {
     console.log("Google login API error:", error);
+    console.log("Error code:", error?.code);
+    console.log("Error message:", error?.message);
     console.log("Error response:", error?.response?.data);
-    throw error;
+    console.log("Error status:", error?.response?.status);
+    
+    // Handle timeout errors
+    if (error?.code === 'ECONNABORTED' || error?.message?.includes('timeout') || error?.message?.includes('exceeded')) {
+      const err = new Error("Час очікування вичерпано. Перевірте підключення до сервера.");
+      (err as any).response = { data: { message: "Час очікування вичерпано" } };
+      throw err;
+    }
+    
+    // Handle connection errors
+    if (error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND' || error?.code === 'ETIMEDOUT') {
+      const err = new Error("Не вдалося підключитися до сервера. Перевірте, чи запущений API сервер.");
+      (err as any).response = { data: { message: "Не вдалося підключитися до сервера" } };
+      throw err;
+    }
+    
+    // Re-throw with response data if available
+    if (error?.response?.data) {
+      throw error;
+    }
+    
+    // Create error with response structure
+    const err = new Error(error?.message || "Помилка входу через Google");
+    (err as any).response = { data: { message: error?.message || "Помилка входу через Google" } };
+    throw err;
   }
 }
 

@@ -104,11 +104,23 @@ export default function Login({ navigation, route }: RootStackScreenProps<"Login
       console.log("Redirect URI:", redirectUri);
       console.log("Code verifier present:", !!request.codeVerifier);
       
+      // Use the exact redirectUri from the request to ensure it matches
+      const exactRedirectUri = request.redirectUri || redirectUri;
+      console.log("Request redirectUri:", request.redirectUri);
+      console.log("Computed redirectUri:", redirectUri);
+      console.log("Using redirect URI for exchange:", exactRedirectUri);
+      console.log("Code verifier length:", request.codeVerifier?.length || 0);
+      
+      if (!request.codeVerifier) {
+        Alert.alert("Помилка", "Code verifier відсутній");
+        return;
+      }
+      
       AuthSession.exchangeCodeAsync(
         {
           clientId,
           code: response.params.code,
-          redirectUri: request.redirectUri || redirectUri, // Use redirectUri from request to ensure exact match
+          redirectUri: exactRedirectUri,
           extraParams: {
             code_verifier: request.codeVerifier, // PKCE code_verifier
           },

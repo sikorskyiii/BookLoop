@@ -1,12 +1,8 @@
-import { useState, useEffect } from "react";
-import { View, Text, Pressable, ScrollView, Image, FlatList } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, Pressable } from "react-native";
 import Header from "../components/Header";
 import { theme } from "../theme/theme";
 import { useAuth } from "../store/useAuth";
 import { RootStackScreenProps } from "../types/navigation";
-import BookGridCard from "../components/BookGridCard";
-import { api } from "../api/client";
 
 interface RowProps {
   label: string;

@@ -59,7 +59,7 @@ export default function Library({ navigation }: RootStackScreenProps<"Library">)
             </Pressable>
           )}
         </View>
-      </View>
+          </View>
 
       {/* Book List */}
       <FlatList
@@ -74,8 +74,8 @@ export default function Library({ navigation }: RootStackScreenProps<"Library">)
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 64 }}>
             <Text style={{ color: theme.colors.textMuted, textAlign: "center", fontSize: 16 }}>
-              Порожньо
-            </Text>
+            Порожньо
+          </Text>
             <Text style={{ color: theme.colors.textMuted, textAlign: "center", fontSize: 14, marginTop: 8 }}>
               Додайте книги, щоб почати
             </Text>

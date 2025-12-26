@@ -8,9 +8,9 @@ if (privateKey?.includes("\\n")) privateKey = privateKey.replace(/\\n/g, "\n");
 if (!admin.apps.length) {
   if (projectId && clientEmail && privateKey) {
     try {
-      admin.initializeApp({
-        credential: admin.credential.cert({ projectId, clientEmail, privateKey } as admin.ServiceAccount)
-      });
+  admin.initializeApp({
+    credential: admin.credential.cert({ projectId, clientEmail, privateKey } as admin.ServiceAccount)
+  });
       console.log("Firebase Admin initialized successfully");
     } catch (error) {
       console.error("Firebase Admin initialization failed:", error);
