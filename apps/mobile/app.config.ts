@@ -10,13 +10,21 @@ export default ({ config }: ConfigContext) => ({
   orientation: "portrait",
   icon: "./assets/icon.png",
   splash: { image: "./assets/splash.png", resizeMode: "contain", backgroundColor: "#0f1115" },
-  ios: { supportsTablet: true, bundleIdentifier: "com.sikorskyiii.bookloop" },
+  ios: { 
+    supportsTablet: true, 
+    bundleIdentifier: "com.sikorskyiii.bookloop",
+    // Development server configuration
+    jsEngine: "hermes"
+  },
   android: {
     adaptiveIcon: { foregroundImage: "./assets/icon.png", backgroundColor: "#0f1115" },
     package: "com.sikorskyiii.bookloop"
   },
   web: { bundler: "metro", output: "single" },
-  plugins: ["expo-secure-store"],
+  plugins: [
+    "expo-secure-store",
+    "expo-file-system"
+  ],
   extra: {
     firebase: {
       apiKey: "AIzaSyCtWbTEZqMUKo09N_5n1BPRMHKZCKrEW74",
