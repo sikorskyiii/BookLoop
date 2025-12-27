@@ -11,6 +11,8 @@ export type RootStackParamList = {
   AddBook: undefined;
   Search: undefined;
   Profile: undefined;
+  EditProfile: undefined;
+  ShareProfile: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, T>;

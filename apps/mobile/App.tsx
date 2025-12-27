@@ -14,6 +14,8 @@ import BookDetails from "./src/screens/BookDetails";
 import AddBook from "./src/screens/AddBook";
 import Search from "./src/screens/Search";
 import Profile from "./src/screens/Profile";
+import EditProfile from "./src/screens/EditProfile";
+import ShareProfile from "./src/screens/ShareProfile";
 import { theme } from "./src/theme/theme";
 import { RootStackParamList, TabParamList } from "./src/types/navigation";
 
@@ -58,6 +60,10 @@ function ChatScreen() {
   );
 }
 
+function ProfileTab() {
+  return <Profile />;
+}
+
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -88,7 +94,7 @@ function MainTabs() {
           tabBarBadgeStyle: { backgroundColor: theme.colors.danger }
         }}
       />
-      <Tab.Screen name="Profile" component={Profile} options={{ title: "Profile" }} />
+      <Tab.Screen name="Profile" component={ProfileTab} options={{ title: "Profile" }} />
     </Tab.Navigator>
   );
 }
@@ -102,6 +108,9 @@ export default function App() {
         <RootStack.Screen name="Login" component={Login} />
         <RootStack.Screen name="Register" component={Register} />
         <RootStack.Screen name="Main" component={MainTabs} />
+        <RootStack.Screen name="Search" component={Search} />
+        <RootStack.Screen name="EditProfile" component={EditProfile} />
+        <RootStack.Screen name="ShareProfile" component={ShareProfile} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

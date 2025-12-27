@@ -10,6 +10,9 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  city?: string | null;
+  bio?: string | null;
+  profilePictureUrl?: string | null;
   createdAt: string;
 }
 

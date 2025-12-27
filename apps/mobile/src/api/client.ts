@@ -28,6 +28,8 @@ export function setAuthToken(t: string | null): void {
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (authToken && config.headers) {
     config.headers.Authorization = `Bearer ${authToken}`;
+  } else {
+    console.warn("No auth token available for request:", config.url);
   }
   return config;
 });

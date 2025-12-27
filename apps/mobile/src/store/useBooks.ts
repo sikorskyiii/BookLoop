@@ -17,17 +17,18 @@ interface Book {
 interface BooksState {
   items: Book[];
   loading: boolean;
-  fetch: () => Promise<void>;
+  fetch: (userId?: string) => Promise<void>;
   add: (title: string, author: string, extra?: Partial<Book>) => Promise<void>;
 }
 
 export const useBooks = create<BooksState>((set, get) => ({
   items: [],
   loading: false,
-  fetch: async () => {
+  fetch: async (userId?: string) => {
     set({ loading: true });
     try {
-      const { data } = await api.get("/books");
+      const url = userId ? `/books?userId=${userId}` : "/books";
+      const { data } = await api.get(url);
       set({ items: data.items ?? data });
     } catch {
       set({ items: [] });
@@ -36,11 +37,24 @@ export const useBooks = create<BooksState>((set, get) => ({
     }
   },
   add: async (title: string, author: string, extra = {}) => {
+    set({ loading: true });
     try {
-      const { data } = await api.post("/books", { title, author, ...extra });
-      set({ items: [data, ...get().items] });
-    } catch {
-      throw new Error("Не вдалося додати книгу");
+      const payload = {
+        title,
+        author,
+        ...extra,
+        price: extra.price !== null && extra.price !== undefined ? Number(extra.price) : null,
+        location: extra.location || null
+      };
+      console.log("Adding book with payload:", payload);
+      const { data } = await api.post("/books", payload);
+      console.log("Book added successfully:", data);
+      set({ items: [data, ...get().items], loading: false });
+    } catch (error: any) {
+      console.error("Add book error:", error);
+      console.error("Error response:", error?.response?.data);
+      set({ loading: false });
+      throw new Error(error?.response?.data?.message || error?.message || "Не вдалося додати книгу");
     }
   }
 }));
