@@ -1,6 +1,8 @@
 import { View, Text, Image, Pressable, StyleProp, ViewStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../theme/theme";
+import { useWishlist } from "../store/useWishlist";
+import { useAuth } from "../store/useAuth";
 
 interface Book {
   id: string;
@@ -31,9 +33,27 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function BookCard({ item, onPress, style }: BookCardProps) {
+  const { isInWishlist, add: addToWishlist, remove: removeFromWishlist } = useWishlist();
+  const { isGuest } = useAuth();
   const categoryLabel = categoryLabels[item.category || ""] || item.category || "Інше";
   const hasPrice = item.price !== null && item.price !== undefined;
   const hasLocation = !!item.location;
+  const inWishlist = !isGuest && isInWishlist(item.id);
+
+  const handleWishlistPress = async (e: any) => {
+    e.stopPropagation();
+    if (isGuest) return;
+    
+    try {
+      if (inWishlist) {
+        await removeFromWishlist(item.id);
+      } else {
+        await addToWishlist(item.id);
+      }
+    } catch (error) {
+      console.error("Wishlist toggle error:", error);
+    }
+  };
 
   return (
     <Pressable
@@ -99,7 +119,13 @@ export default function BookCard({ item, onPress, style }: BookCardProps) {
           ) : (
             <Ionicons name="refresh-outline" size={20} color={theme.colors.textMuted} />
           )}
-          <Ionicons name="bookmark-outline" size={20} color={theme.colors.textMuted} />
+          <Pressable onPress={handleWishlistPress} disabled={isGuest}>
+            <Ionicons
+              name={inWishlist ? "bookmark" : "bookmark-outline"}
+              size={20}
+              color={inWishlist ? theme.colors.primary : theme.colors.textMuted}
+            />
+          </Pressable>
         </View>
       </View>
     </Pressable>
