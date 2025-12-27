@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Image, Alert, Share, Platform } from
 import { Ionicons } from "@expo/vector-icons";
 import QRCode from "react-native-qrcode-svg";
 import { captureRef } from "react-native-view-shot";
-import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { theme } from "../theme/theme";
 import { useAuth } from "../store/useAuth";
 import { RootStackScreenProps } from "../types/navigation";
@@ -60,24 +60,38 @@ export default function ShareProfile({ navigation }: RootStackScreenProps<"Share
           quality: 1.0,
         });
 
-        // Зберігаємо файл
-        const filename = `bookloop-profile-qr-${user?.id || "profile"}.png`;
-        const fileUri = `${FileSystem.documentDirectory}${filename}`;
-        
-        await FileSystem.copyAsync({
-          from: uri,
-          to: fileUri,
-        });
-
-        // Використовуємо вбудований Share API
+        // Використовуємо URI безпосередньо з captureRef для sharing
+        // captureRef вже створює тимчасовий файл, який можна використати
         try {
-          await Share.share({
-            url: fileUri,
-            message: "QR код мого профілю BookLoop"
-          });
-        } catch (shareError) {
-          // Якщо Share не працює, показуємо повідомлення
-          Alert.alert("Успіх", "QR код збережено. Файл знаходиться в: " + fileUri);
+          const isAvailable = await Sharing.isAvailableAsync();
+          if (isAvailable) {
+            await Sharing.shareAsync(uri, {
+              mimeType: "image/png",
+              dialogTitle: "Зберегти QR код",
+            });
+            Alert.alert("Успіх", "QR код готовий до збереження");
+          } else {
+            // Якщо Sharing недоступний, використовуємо стандартний Share API
+            try {
+              await Share.share({
+                url: Platform.OS === "ios" ? uri : `file://${uri}`,
+                message: "QR код мого профілю BookLoop"
+              });
+            } catch (shareError) {
+              Alert.alert("Успіх", "QR код готовий до збереження");
+            }
+          }
+        } catch (shareError: any) {
+          console.error("Sharing error:", shareError);
+          // Якщо Sharing не працює, використовуємо стандартний Share API як fallback
+          try {
+            await Share.share({
+              url: Platform.OS === "ios" ? uri : `file://${uri}`,
+              message: "QR код мого профілю BookLoop"
+            });
+          } catch (fallbackError) {
+            Alert.alert("Помилка", "Не вдалося поділитися QR кодом");
+          }
         }
       } catch (nativeError: any) {
         // Якщо нативні модулі недоступні, показуємо інструкцію
