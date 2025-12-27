@@ -2,6 +2,8 @@
 
 Для роботи Google OAuth потрібно налаштувати Firebase Admin SDK.
 
+**Примітка:** Для зберігання зображень використовується Cloudinary (див. `CLOUDINARY_SETUP.md`), а не Firebase Storage.
+
 ## Крок 1: Отримайте Service Account ключ
 
 1. Відкрийте [Firebase Console](https://console.firebase.google.com/)
@@ -27,6 +29,10 @@ JWT_EXPIRES_IN=7d
 FIREBASE_PROJECT_ID=bookloop-af1c8
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@bookloop-af1c8.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour private key here\n-----END PRIVATE KEY-----\n"
+# Опціонально: якщо потрібен конкретний bucket (за замовчуванням використовується <project-id>.appspot.com)
+# Для проекту bookloop-af1c8 bucket за замовчуванням: bookloop-af1c8.appspot.com
+# Якщо використовується інший bucket, розкоментуйте та вкажіть:
+# FIREBASE_STORAGE_BUCKET=bookloop-af1c8.appspot.com
 
 # CORS
 CORS_ORIGIN=http://localhost:3000,http://localhost:19006
@@ -56,9 +62,32 @@ PORT=3000
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...\n-----END PRIVATE KEY-----\n"
 ```
 
-## Крок 4: Перезапустіть API сервер
+## Крок 4: Увімкніть Firebase Storage
 
-Після створення `.env` файлу перезапустіть API сервер:
+Firebase Storage потрібен для завантаження зображень профілю.
+
+1. Відкрийте [Firebase Console](https://console.firebase.google.com/)
+2. Виберіть проект `bookloop-af1c8`
+3. Перейдіть до **Storage** в лівому меню
+4. Натисніть **Get started** (якщо Storage ще не увімкнено)
+5. Виберіть режим безпеки:
+   - **Test mode** (для розробки) - дозволяє читання/запис на 30 днів
+   - **Production mode** (для продакшену) - потрібні правила безпеки
+6. Виберіть локацію для bucket (наприклад, `us-central1`)
+7. Натисніть **Done**
+
+Після цього буде автоматично створено bucket `bookloop-af1c8.appspot.com`.
+
+**Важливо:** Переконайтеся, що service account має права на Storage:
+1. Перейдіть до [Google Cloud Console](https://console.cloud.google.com/)
+2. IAM & Admin → Service Accounts
+3. Знайдіть ваш service account (email з `FIREBASE_CLIENT_EMAIL`)
+4. Переконайтеся, що є роль **Storage Admin** або **Storage Object Admin**
+5. Якщо ролі немає, натисніть на service account → **Permissions** → **Grant Access** → додайте роль **Storage Admin**
+
+## Крок 5: Перезапустіть API сервер
+
+Після створення `.env` файлу та увімкнення Firebase Storage перезапустіть API сервер:
 
 ```bash
 cd apps/api
