@@ -1,0 +1,17 @@
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "ignore": [
+    "node_modules/**/*",
+    "**/node_modules/**/*",
+    "*.test.ts",
+    "*.spec.ts",
+    "build/**/*",
+    "dist/**/*",
+    ".git/**/*",
+    "*.log"
+  ],
+  "exec": "npx tsx src/index.ts",
+  "delay": 1000
+}
+
